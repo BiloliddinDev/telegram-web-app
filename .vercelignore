@@ -1,0 +1,9 @@
+backend/node_modules
+backend/.env
+frontend/.next
+frontend/node_modules
+node_modules
+.git
+*.md
+!README.md
+

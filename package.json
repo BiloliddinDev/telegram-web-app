@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "description": "Telegram Web App - Sales Management System",
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "build": "cd frontend && npm install && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "start:backend": "cd backend && npm start",
-    "start:frontend": "cd frontend && npm start"
+    "start:frontend": "cd frontend && npm start",
+    "start": "cd frontend && npm start",
+    "vercel-build": "cd frontend && npm install && npm run build"
   },
   "keywords": [
     "telegram",
@@ -16,7 +19,6 @@
     "sales",
     "management"
   ],
-  "author": "",
+  "author": "Biloliddin Salimov",
   "license": "ISC"
 }
-
