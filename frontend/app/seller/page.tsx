@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
@@ -24,29 +24,51 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Package, ShoppingCart, BarChart3 } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  image: string;
+  assignedSellers: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Sale {
+  _id: string;
+  product: Product;
+  quantity: number;
+  totalPrice: number;
+  customerName?: string;
+  customerPhone?: string;
+  createdAt: string;
+}
+
+interface Report {
+  totalSales: number;
+  totalRevenue: number;
+  salesByCategory: Record<string, number>;
+  recentSales: Sale[];
+}
 
 export default function SellerPage() {
   const router = useRouter();
-  const { user, fetchUser } = useAuthStore();
+  const { user } = useAuthStore();
   const { showToast, ToastComponent } = useToast();
-  const [products, setProducts] = useState<any[]>([]);
-  const [sales, setSales] = useState<any[]>([]);
-  const [reports, setReports] = useState<any>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [reports, setReports] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
 
-  useEffect(() => {
-    if (user && user.role !== "seller") {
-      router.push("/");
-    }
-    if (user?.role === "seller") {
-      loadData();
-    }
-  }, [user, router]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [productsRes, salesRes, reportsRes] = await Promise.all([
@@ -57,16 +79,25 @@ export default function SellerPage() {
       setProducts(productsRes.data.products);
       setSales(salesRes.data.sales);
       setReports(reportsRes.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading data:", error);
       showToast(
-        error.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
+        (error as any)?.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
         "error"
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (user && user.role !== "seller") {
+      router.push("/");
+    }
+    if (user?.role === "seller") {
+      loadData();
+    }
+  }, [user, router, loadData]);
 
   const handleCreateSale = async (
     e: React.FormEvent<HTMLFormElement>,

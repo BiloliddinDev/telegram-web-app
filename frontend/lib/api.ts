@@ -1,8 +1,16 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp?: unknown;
+    };
+  }
+}
 
 // Vercel'da backend va frontend bir domain'da, shuning uchun relative path ishlatamiz
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" ? "/api" : "http://localhost:5000/api");
+  process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" ? "http://localhost:5000/api" : "http://localhost:5000/api");
 
 // Wait for Telegram WebApp script to load
 export const waitForTelegram = (): Promise<any> => {
@@ -13,16 +21,16 @@ export const waitForTelegram = (): Promise<any> => {
 		}
 
 		// Check if already loaded
-		if ((window as any).Telegram?.WebApp) {
-			resolve((window as any).Telegram.WebApp);
+		if (window.Telegram?.WebApp) {
+			resolve(window.Telegram.WebApp);
 			return;
 		}
 
 		// Wait for script to load
 		const checkTelegram = setInterval(() => {
-			if ((window as any).Telegram?.WebApp) {
+			if (window.Telegram?.WebApp) {
 				clearInterval(checkTelegram);
-				resolve((window as any).Telegram.WebApp);
+				resolve(window.Telegram.WebApp);
 			}
 		}, 100);
 
@@ -36,8 +44,8 @@ export const waitForTelegram = (): Promise<any> => {
 
 // Get Telegram WebApp data
 export const getTelegramData = () => {
-	if (typeof window !== "undefined" && (window as any).Telegram?.WebApp) {
-		return (window as any).Telegram.WebApp;
+	if (typeof window !== "undefined" && window.Telegram?.WebApp) {
+		return window.Telegram.WebApp;
 	}
 	return null;
 };
@@ -83,7 +91,7 @@ api.interceptors.request.use(
 		}
 		return config;
 	},
-	(error) => {
+	(error: unknown) => {
 		return Promise.reject(error);
 	}
 );
@@ -91,11 +99,12 @@ api.interceptors.request.use(
 // Add response interceptor for error handling
 api.interceptors.response.use(
 	(response) => response,
-	(error) => {
-		if (error.response?.status === 401) {
+	(error: unknown) => {
+		const axiosError = error as AxiosError;
+		if (axiosError.response?.status === 401) {
 			// Handle unauthorized access
 			console.error("Unauthorized access");
-		} else if (error.response?.status === 403) {
+		} else if (axiosError.response?.status === 403) {
 			// Handle forbidden access
 			console.error("Forbidden access");
 		}

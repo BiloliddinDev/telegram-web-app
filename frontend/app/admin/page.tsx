@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import api from "@/lib/api";
@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -24,29 +23,55 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, Package, Users, BarChart3 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  stock: number;
+  image: string;
+  assignedSellers: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface User {
+  _id: string;
+  telegramId: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  role: 'admin' | 'seller';
+  isActive: boolean;
+  assignedProducts?: Product[];
+}
+
+interface Report {
+  totalSales: number;
+  totalRevenue: number;
+  totalProducts: number;
+  totalUsers: number;
+  salesByCategory: Record<string, number>;
+  topProducts: Product[];
+  recentSales: any[];
+}
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user, fetchUser } = useAuthStore();
+  const { user } = useAuthStore();
   const { showToast, ToastComponent } = useToast();
-  const [products, setProducts] = useState<any[]>([]);
-  const [sellers, setSellers] = useState<any[]>([]);
-  const [reports, setReports] = useState<any>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [sellers, setSellers] = useState<User[]>([]);
+  const [reports, setReports] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
 
-  useEffect(() => {
-    if (user && user.role !== "admin") {
-      router.push("/");
-    }
-    if (user?.role === "admin") {
-      loadData();
-    }
-  }, [user, router]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [productsRes, sellersRes, reportsRes] = await Promise.all([
@@ -57,16 +82,25 @@ export default function AdminPage() {
       setProducts(productsRes.data.products);
       setSellers(sellersRes.data.sellers);
       setReports(reportsRes.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading data:", error);
       showToast(
-        error.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
+        (error as any)?.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
         "error"
       );
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    if (user && user.role !== "admin") {
+      router.push("/");
+    }
+    if (user?.role === "admin") {
+      loadData();
+    }
+  }, [user, router, loadData]);
 
   const handleCreateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -82,10 +116,10 @@ export default function AdminPage() {
       showToast("Mahsulot muvaffaqiyatli qo'shildi", "success");
       loadData();
       (document.getElementById("product-dialog") as any)?.close();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating product:", error);
       showToast(
-        error.response?.data?.error || "Mahsulot qo'shishda xatolik",
+        (error as any)?.response?.data?.error || "Mahsulot qo'shishda xatolik",
         "error"
       );
     }
@@ -96,10 +130,10 @@ export default function AdminPage() {
       await api.post(`/admin/sellers/${sellerId}/products/${productId}`);
       showToast("Mahsulot muvaffaqiyatli biriktirildi", "success");
       loadData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error assigning product:", error);
       showToast(
-        error.response?.data?.error || "Mahsulot biriktirishda xatolik",
+        (error as any)?.response?.data?.error || "Mahsulot biriktirishda xatolik",
         "error"
       );
     }
@@ -339,7 +373,7 @@ export default function AdminPage() {
                                   handleAssignProduct(product._id, seller._id)
                                 }
                                 disabled={product.assignedSellers?.some(
-                                  (s: any) => s._id === seller._id
+                                  (s: string) => s === seller._id
                                 )}
                               >
                                 {seller.firstName}

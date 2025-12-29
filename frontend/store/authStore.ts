@@ -38,10 +38,10 @@ export const useAuthStore = create<AuthState>((set) => ({
 			console.log("User fetched:", response.data.user);
 
 			set({ user: response.data.user, loading: false });
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error("Error fetching user:", error);
 			set({
-				error: error.response?.data?.error || error.message || "Foydalanuvchi ma'lumotlarini yuklashda xatolik",
+				error: error instanceof Error ? (error as any).response?.data?.error || error.message : "Foydalanuvchi ma'lumotlarini yuklashda xatolik",
 				loading: false,
 			});
 		}

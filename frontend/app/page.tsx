@@ -54,9 +54,9 @@ export default function Home() {
             );
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Telegram initialization error:", err);
-        setInitError(err.message || "Xatolik yuz berdi");
+        setInitError(err instanceof Error ? err.message : "Xatolik yuz berdi");
       }
     };
 
