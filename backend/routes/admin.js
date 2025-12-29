@@ -25,13 +25,13 @@ router.get("/sellers", async (req, res) => {
 });
 
 // Create new seller
-router.post("/sellers", validateSeller, async (req, res) => {
+router.post("/sellers", async (req, res) => {
   try {
-    const { telegramId, username, firstName, lastName } = req.body;
+    const { telegramId, username, firstName, lastName, phoneNumber } = req.body;
 
     const existingUser = await User.findOne({ telegramId });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(400).json({ error: "Foydalanuvchi allaqachon mavjud" });
     }
 
     const seller = await User.create({
@@ -39,6 +39,7 @@ router.post("/sellers", validateSeller, async (req, res) => {
       username,
       firstName,
       lastName,
+      phoneNumber,
       role: "seller",
     });
 
@@ -87,6 +88,7 @@ router.delete("/sellers/:id", async (req, res) => {
 // Assign product to seller
 router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
   try {
+    const { quantity } = req.body;
     const seller = await User.findById(req.params.sellerId);
     const product = await Product.findById(req.params.productId);
 
@@ -98,6 +100,11 @@ router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
+    const assignQuantity = parseInt(quantity) || 0;
+    if (assignQuantity > product.stock) {
+      return res.status(400).json({ error: "Omborda yetarli mahsulot yo'q" });
+    }
+
     // Add product to seller's assigned products
     if (!seller.assignedProducts.includes(product._id)) {
       seller.assignedProducts.push(product._id);
@@ -107,8 +114,13 @@ router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
     // Add seller to product's assigned sellers
     if (!product.assignedSellers.includes(seller._id)) {
       product.assignedSellers.push(seller._id);
-      await product.save();
     }
+    
+    // Reduce stock if quantity provided
+    if (assignQuantity > 0) {
+      product.stock -= assignQuantity;
+    }
+    await product.save();
 
     res.json({ message: "Product assigned successfully", seller, product });
   } catch (error) {

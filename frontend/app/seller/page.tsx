@@ -73,6 +73,7 @@ export default function SellerPage() {
   const [reports, setReports] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
+  const [isSaleModalOpen, setIsSaleModalOpen] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -128,12 +129,8 @@ export default function SellerPage() {
         notes: formData.get("notes"),
       });
       showToast("Sotuv muvaffaqiyatli qayd etildi", "success");
+      setIsSaleModalOpen(null);
       loadData();
-      (
-        document.getElementById(
-          `sale-dialog-${productId}`
-        ) as HTMLDialogElement | null
-      )?.close();
     } catch (error: unknown) {
       const axiosError = error as AxiosError;
       showToast(
@@ -169,41 +166,49 @@ export default function SellerPage() {
           <TabsContent value="products" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Biriktirilgan Mahsulotlar</CardTitle>
+                <CardTitle>Mahsulotlar</CardTitle>
                 <CardDescription>
                   Sizga biriktirilgan mahsulotlar
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {products.length === 0 ? (
                     <p className="text-muted-foreground">
                       Sizga hali mahsulot biriktirilmagan
                     </p>
                   ) : (
                     products.map((product) => (
-                      <Card key={product._id}>
-                        <CardHeader>
-                          <CardTitle>{product.name}</CardTitle>
-                          <CardDescription>
+                      <Card key={product._id} className="overflow-hidden">
+                        <CardHeader className="p-4">
+                          <div className="flex justify-between items-start">
+                            <CardTitle className="text-lg">{product.name}</CardTitle>
+                            <span className="text-xs bg-secondary px-2 py-1 rounded">
+                              {product.category}
+                            </span>
+                          </div>
+                          <CardDescription className="line-clamp-2">
                             {product.description}
                           </CardDescription>
                         </CardHeader>
-                        <CardContent>
-                          <p className="text-2xl font-bold mb-2">
-                            {product.price} so'm
+                        <CardContent className="p-4 pt-0">
+                          <p className="text-2xl font-bold mb-1">
+                            {product.price.toLocaleString()} so&apos;m
                           </p>
                           <p className="text-sm text-muted-foreground mb-4">
-                            Omborda: {product.stock}
+                            Omborda: {product.stock} ta
                           </p>
-                          <Dialog>
+                          <Dialog 
+                            open={isSaleModalOpen === product._id} 
+                            onOpenChange={(open) => setIsSaleModalOpen(open ? product._id : null)}
+                          >
                             <DialogTrigger asChild>
-                              <Button className="w-full">
+                              <Button className="w-full" disabled={product.stock <= 0}>
                                 <ShoppingCart className="mr-2 h-4 w-4" />
-                                Sotish
+                                {product.stock <= 0 ? "Tugagan" : "Sotish"}
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
                               <form
                                 onSubmit={(e) =>
                                   handleCreateSale(e, product._id)
@@ -212,7 +217,7 @@ export default function SellerPage() {
                                 <DialogHeader>
                                   <DialogTitle>Sotish</DialogTitle>
                                   <DialogDescription>
-                                    {product.name} - {product.price} so'm
+                                    {product.name} - {product.price.toLocaleString()} so&apos;m
                                   </DialogDescription>
                                 </DialogHeader>
                                 <div className="grid gap-4 py-4">
@@ -224,8 +229,10 @@ export default function SellerPage() {
                                       type="number"
                                       min="1"
                                       max={product.stock}
+                                      defaultValue="1"
                                       required
                                     />
+                                    <p className="text-xs text-muted-foreground">Mavjud: {product.stock} ta</p>
                                   </div>
                                   <div className="grid gap-2">
                                     <Label htmlFor="customerName">
@@ -234,6 +241,7 @@ export default function SellerPage() {
                                     <Input
                                       id="customerName"
                                       name="customerName"
+                                      placeholder="Ismi"
                                     />
                                   </div>
                                   <div className="grid gap-2">
@@ -243,15 +251,16 @@ export default function SellerPage() {
                                     <Input
                                       id="customerPhone"
                                       name="customerPhone"
+                                      placeholder="+998"
                                     />
                                   </div>
                                   <div className="grid gap-2">
                                     <Label htmlFor="notes">Izoh</Label>
-                                    <Input id="notes" name="notes" />
+                                    <Input id="notes" name="notes" placeholder="Qoshimcha ma'lumot" />
                                   </div>
                                 </div>
                                 <DialogFooter>
-                                  <Button type="submit">Sotish</Button>
+                                  <Button type="submit" className="w-full">Sotish</Button>
                                 </DialogFooter>
                               </form>
                             </DialogContent>
@@ -269,40 +278,38 @@ export default function SellerPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Sotuvlar</CardTitle>
-                <CardDescription>Barcha sotuvlar ro'yxati</CardDescription>
+                <CardDescription>Barcha sotuvlar ro&apos;yxati</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   {sales.length === 0 ? (
-                    <p className="text-muted-foreground">Hali sotuvlar yo'q</p>
+                    <p className="text-muted-foreground col-span-full text-center py-8">Hali sotuvlar yo&apos;q</p>
                   ) : (
                     sales.map((sale) => (
                       <Card key={sale._id}>
-                        <CardContent className="pt-6">
+                        <CardContent className="p-4 pt-6">
                           <div className="flex justify-between items-start">
                             <div>
-                              <h3 className="font-semibold">
+                              <h3 className="font-semibold text-lg">
                                 {sale.product?.name}
                               </h3>
                               <p className="text-sm text-muted-foreground">
-                                Miqdor: {sale.quantity} | Narx: {sale.price}{" "}
-                                so'm
+                                {sale.quantity} ta x {sale.price.toLocaleString()} so&apos;m
                               </p>
-                              <p className="text-sm text-muted-foreground">
-                                Jami: {sale.totalPrice} so'm
+                              <p className="text-md font-bold text-primary mt-1">
+                                Jami: {sale.totalPrice.toLocaleString()} so&apos;m
                               </p>
                               {sale.customerName && (
-                                <p className="text-sm">
-                                  Mijoz: {sale.customerName}
-                                </p>
+                                <div className="mt-2 text-sm border-t pt-2">
+                                  <p><span className="text-muted-foreground">Mijoz:</span> {sale.customerName}</p>
+                                  {sale.customerPhone && <p><span className="text-muted-foreground">Tel:</span> {sale.customerPhone}</p>}
+                                </div>
                               )}
                             </div>
                             <div className="text-right">
-                              <p className="text-sm text-muted-foreground">
-                                {new Date(sale.createdAt).toLocaleDateString(
-                                  "uz-UZ"
-                                )}
-                              </p>
+                              <span className="text-[10px] bg-secondary px-2 py-1 rounded">
+                                {new Date(sale.createdAt).toLocaleDateString("uz-UZ")}
+                              </span>
                             </div>
                           </div>
                         </CardContent>
@@ -317,43 +324,37 @@ export default function SellerPage() {
           <TabsContent value="reports" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Hisobotlar</CardTitle>
-                <CardDescription>Oylik savdo statistikasi</CardDescription>
+                <CardTitle>Oylik Statistikangiz</CardTitle>
+                <CardDescription>Shaxsiy savdo ko&apos;rsatkichlari</CardDescription>
               </CardHeader>
               <CardContent>
                 {reports && (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Jami savdo</CardTitle>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <Card className="bg-primary/5 border-primary/20">
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Sotuvlar soni</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <p className="text-2xl font-bold">
-                            {reports.summary.totalSales}
+                        <CardContent className="p-4 pt-0">
+                          <p className="text-2xl font-bold">{reports.summary.totalSales} ta</p>
+                        </CardContent>
+                      </Card>
+                      <Card className="bg-green-500/5 border-green-500/20">
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Jami daromad</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-0">
+                          <p className="text-2xl font-bold text-green-600">
+                            {reports.summary.totalRevenue.toLocaleString()} so&apos;m
                           </p>
                         </CardContent>
                       </Card>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">
-                            Jami daromad
-                          </CardTitle>
+                      <Card className="bg-blue-500/5 border-blue-500/20">
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-sm font-medium text-muted-foreground">Mahsulotlar</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                          <p className="text-2xl font-bold">
-                            {reports.summary.totalRevenue.toLocaleString()} so'm
-                          </p>
-                        </CardContent>
-                      </Card>
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Jami miqdor</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <p className="text-2xl font-bold">
-                            {reports.summary.totalQuantity}
-                          </p>
+                        <CardContent className="p-4 pt-0">
+                          <p className="text-2xl font-bold text-blue-600">{reports.summary.totalQuantity} ta</p>
                         </CardContent>
                       </Card>
                     </div>
