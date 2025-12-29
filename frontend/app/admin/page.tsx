@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -103,7 +102,7 @@ export default function AdminPage() {
       const axiosError = error as AxiosError;
       showToast(
         (axiosError.response?.data as { error?: string })?.error ||
-          "Ma'lumotlarni yuklashda xatolik",
+          "Ma&apos;lumotlarni yuklashda xatolik",
         "error"
       );
     } finally {
@@ -206,7 +205,7 @@ export default function AdminPage() {
                     <DialogContent>
                       <form onSubmit={handleCreateProduct}>
                         <DialogHeader>
-                          <DialogTitle>Yangi mahsulot qo'shish</DialogTitle>
+                          <DialogTitle>Yangi mahsulot qo&apos;shish</DialogTitle>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                           <div className="grid gap-2">
@@ -242,7 +241,7 @@ export default function AdminPage() {
                           </div>
                         </div>
                         <DialogFooter>
-                          <Button type="submit">Qo'shish</Button>
+                          <Button type="submit">Qo&apos;shish</Button>
                         </DialogFooter>
                       </form>
                     </DialogContent>
@@ -259,7 +258,7 @@ export default function AdminPage() {
                       </CardHeader>
                       <CardContent>
                         <p className="text-2xl font-bold">
-                          {product.price} so'm
+                          {product.price} so&apos;m
                         </p>
                         <p className="text-sm text-muted-foreground">
                           Omborda: {product.stock}
@@ -277,7 +276,7 @@ export default function AdminPage() {
               <CardHeader>
                 <CardTitle>Sotuvchilar</CardTitle>
                 <CardDescription>
-                  Barcha sotuvchilarni ko'ring va boshqaring
+                  Barcha sotuvchilarni ko&apos;ring va boshqaring
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -346,7 +345,7 @@ export default function AdminPage() {
                         </CardHeader>
                         <CardContent>
                           <p className="text-2xl font-bold">
-                            {reports.summary.totalRevenue.toLocaleString()} so'm
+                            {reports.summary.totalRevenue.toLocaleString()} so&apos;m
                           </p>
                         </CardContent>
                       </Card>
@@ -384,7 +383,7 @@ export default function AdminPage() {
                           <div>
                             <h3 className="font-semibold">{product.name}</h3>
                             <p className="text-sm text-muted-foreground">
-                              {product.price} so'm
+                              {product.price} so&apos;m
                             </p>
                           </div>
                           <div className="flex gap-2">
