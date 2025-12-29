@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -25,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+import { AxiosError } from "axios";
 
 interface Product {
   _id: string;
@@ -46,19 +48,33 @@ interface User {
   username?: string;
   firstName?: string;
   lastName?: string;
-  role: 'admin' | 'seller';
+  role: "admin" | "seller";
   isActive: boolean;
   assignedProducts?: Product[];
 }
 
+interface Sale {
+  _id: string;
+  product: Product;
+  quantity: number;
+  price: number;
+  totalPrice: number;
+  customerName?: string;
+  customerPhone?: string;
+  createdAt: string;
+}
+
 interface Report {
-  totalSales: number;
-  totalRevenue: number;
-  totalProducts: number;
-  totalUsers: number;
+  summary: {
+    totalSales: number;
+    totalRevenue: number;
+    totalProducts: number;
+    totalUsers: number;
+    totalQuantity: number;
+  };
   salesByCategory: Record<string, number>;
   topProducts: Product[];
-  recentSales: any[];
+  recentSales: Sale[];
 }
 
 export default function AdminPage() {
@@ -84,8 +100,10 @@ export default function AdminPage() {
       setReports(reportsRes.data);
     } catch (error: unknown) {
       console.error("Error loading data:", error);
+      const axiosError = error as AxiosError;
       showToast(
-        (error as any)?.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Ma'lumotlarni yuklashda xatolik",
         "error"
       );
     } finally {
@@ -115,11 +133,15 @@ export default function AdminPage() {
       });
       showToast("Mahsulot muvaffaqiyatli qo'shildi", "success");
       loadData();
-      (document.getElementById("product-dialog") as any)?.close();
+      (
+        document.getElementById("product-dialog") as HTMLDialogElement | null
+      )?.close();
     } catch (error: unknown) {
       console.error("Error creating product:", error);
+      const axiosError = error as AxiosError;
       showToast(
-        (error as any)?.response?.data?.error || "Mahsulot qo'shishda xatolik",
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Mahsulot qo'shishda xatolik",
         "error"
       );
     }
@@ -132,8 +154,10 @@ export default function AdminPage() {
       loadData();
     } catch (error: unknown) {
       console.error("Error assigning product:", error);
+      const axiosError = error as AxiosError;
       showToast(
-        (error as any)?.response?.data?.error || "Mahsulot biriktirishda xatolik",
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Mahsulot biriktirishda xatolik",
         "error"
       );
     }
@@ -393,4 +417,3 @@ export default function AdminPage() {
     </div>
   );
 }
-

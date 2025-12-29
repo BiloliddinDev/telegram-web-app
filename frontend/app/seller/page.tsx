@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
@@ -26,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
+import { AxiosError } from "axios";
 
 interface Product {
   _id: string;
@@ -45,6 +47,7 @@ interface Sale {
   _id: string;
   product: Product;
   quantity: number;
+  price: number;
   totalPrice: number;
   customerName?: string;
   customerPhone?: string;
@@ -52,8 +55,11 @@ interface Sale {
 }
 
 interface Report {
-  totalSales: number;
-  totalRevenue: number;
+  summary: {
+    totalSales: number;
+    totalRevenue: number;
+    totalQuantity: number;
+  };
   salesByCategory: Record<string, number>;
   recentSales: Sale[];
 }
@@ -81,8 +87,10 @@ export default function SellerPage() {
       setReports(reportsRes.data);
     } catch (error: unknown) {
       console.error("Error loading data:", error);
+      const axiosError = error as AxiosError;
       showToast(
-        (error as any)?.response?.data?.error || "Ma'lumotlarni yuklashda xatolik",
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Ma'lumotlarni yuklashda xatolik",
         "error"
       );
     } finally {
@@ -107,6 +115,10 @@ export default function SellerPage() {
     const formData = new FormData(e.currentTarget);
     try {
       const product = products.find((p) => p._id === productId);
+      if (!product) {
+        showToast("Mahsulot topilmadi", "error");
+        return;
+      }
       await api.post("/sales", {
         productId,
         quantity: parseInt(formData.get("quantity") as string),
@@ -117,10 +129,16 @@ export default function SellerPage() {
       });
       showToast("Sotuv muvaffaqiyatli qayd etildi", "success");
       loadData();
-      (document.getElementById(`sale-dialog-${productId}`) as any)?.close();
-    } catch (error: any) {
+      (
+        document.getElementById(
+          `sale-dialog-${productId}`
+        ) as HTMLDialogElement | null
+      )?.close();
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError;
       showToast(
-        error.response?.data?.error || "Sotuv qayd etishda xatolik",
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Sotuv qayd etishda xatolik",
         "error"
       );
     }
@@ -271,7 +289,7 @@ export default function SellerPage() {
                                 so'm
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                Jami: {sale.totalAmount} so'm
+                                Jami: {sale.totalPrice} so'm
                               </p>
                               {sale.customerName && (
                                 <p className="text-sm">
@@ -281,7 +299,7 @@ export default function SellerPage() {
                             </div>
                             <div className="text-right">
                               <p className="text-sm text-muted-foreground">
-                                {new Date(sale.saleDate).toLocaleDateString(
+                                {new Date(sale.createdAt).toLocaleDateString(
                                   "uz-UZ"
                                 )}
                               </p>

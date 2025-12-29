@@ -1,13 +1,5 @@
 "use client";
 
-declare global {
-  interface Window {
-    Telegram?: {
-      WebApp?: unknown;
-    };
-  }
-}
-
 import { useEffect } from "react";
 
 export default function TelegramScript() {
@@ -23,4 +15,3 @@ export default function TelegramScript() {
 
   return null;
 }
-
