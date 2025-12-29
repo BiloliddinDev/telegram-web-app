@@ -44,7 +44,6 @@ export default function Home() {
           await fetchUser();
           console.log("User fetch completed");
         } else {
-          // Not in Telegram environment
           console.log("Not in Telegram environment, window.location.href:", window.location.href);
           const isTelegram =
             window.location.href.includes("t.me") ||
@@ -87,7 +86,7 @@ export default function Home() {
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Yuklanmoqda...</p>
+          <p className="mt-4 text-muted-foreground">Biloliddin Salimov...</p>
         </div>
       </div>
     );
