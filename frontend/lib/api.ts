@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// Vercel'da backend va frontend bir domain'da, shuning uchun relative path ishlatamiz
 const API_URL =
-	process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" ? "/api" : "http://localhost:5000/api");
 
 // Wait for Telegram WebApp script to load
 export const waitForTelegram = (): Promise<any> => {
