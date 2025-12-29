@@ -85,6 +85,8 @@ export default function AdminPage() {
   const [reports, setReports] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
+  
+  console.log(loading, "loading");
 
   const loadData = useCallback(async () => {
     try {
