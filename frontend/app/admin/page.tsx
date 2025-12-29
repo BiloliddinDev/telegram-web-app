@@ -161,10 +161,10 @@ export default function AdminPage() {
       );
     }
   };
-
-  if (loading) {
-    return <div className="p-4">Yuklanmoqda...</div>;
-  }
+  //
+  // if (loading) {
+  //   return <div className="p-4">Yuklanmoqda...</div>;
+  // }
 
   return (
     <div className="min-h-screen bg-background p-4">
