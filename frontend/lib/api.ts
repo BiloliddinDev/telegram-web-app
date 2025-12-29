@@ -28,7 +28,7 @@ declare global {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   (typeof window !== "undefined"
-    ? "http://localhost:5000/api"
+    ? window.location.origin + "/api"
     : "http://localhost:5000/api");
 
 // Wait for Telegram WebApp script to load

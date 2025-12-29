@@ -12,9 +12,11 @@ export default function Home() {
 
   useEffect(() => {
     const initTelegram = async () => {
+      console.log("Initializing Telegram WebApp...");
       try {
         // Wait for Telegram WebApp to load
         const webApp = await waitForTelegram();
+        console.log("WebApp result:", webApp ? "Loaded" : "Not loaded");
 
         if (webApp) {
           // Initialize Telegram WebApp
@@ -30,6 +32,7 @@ export default function Home() {
           console.log("Telegram ID:", telegramId);
 
           if (!telegramId) {
+            console.error("Telegram ID not found");
             setInitError(
               "Telegram ID topilmadi. Iltimos, Telegram orqali kirish."
             );
@@ -37,9 +40,12 @@ export default function Home() {
           }
 
           // Fetch user data
+          console.log("Fetching user...");
           await fetchUser();
+          console.log("User fetch completed");
         } else {
           // Not in Telegram environment
+          console.log("Not in Telegram environment, window.location.href:", window.location.href);
           const isTelegram =
             window.location.href.includes("t.me") ||
             window.location.href.includes("telegram.org");
@@ -64,16 +70,19 @@ export default function Home() {
   }, [fetchUser]);
 
   useEffect(() => {
+    console.log("Auth state changed:", { user, loading, error });
     if (!loading && user) {
+      console.log("User role:", user.role);
       if (user.role === "admin") {
         router.push("/admin");
       } else if (user.role === "seller") {
         router.push("/seller");
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, error]);
 
   if (loading) {
+    console.log("Rendering loading state...");
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <div className="text-center">
@@ -85,6 +94,7 @@ export default function Home() {
   }
 
   if (initError || error) {
+    console.log("Rendering error state:", initError || error);
     return (
       <div className="flex items-center justify-center min-h-screen bg-background p-4">
         <div className="text-center max-w-md">
