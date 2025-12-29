@@ -3,6 +3,7 @@
 ## ⚡ Tez Deploy (Tavsiya etiladi)
 
 ### Backend: Railway'da
+
 ### Frontend: Vercel'da
 
 **Batafsil qo'llanma:** [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
@@ -36,6 +37,7 @@ Fayl allaqachon tayyor, faqat backend URL'ni o'zgartiring (agar kerak bo'lsa).
 ## 🔧 Environment Variables
 
 ### Backend (Railway)
+
 ```
 TELEGRAM_BOT_TOKEN=your_token
 MONGO_URI=your_mongodb_uri
@@ -47,6 +49,7 @@ FRONTEND_URL=https://your-frontend.vercel.app
 ```
 
 ### Frontend (Vercel)
+
 ```
 NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
 ```
@@ -65,4 +68,3 @@ NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
 - [VERCEL_DEPLOY.md](./VERCEL_DEPLOY.md) - Batafsil Vercel qo'llanmasi
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Boshqa platformalar
 - [TELEGRAM_SETUP.md](./TELEGRAM_SETUP.md) - Telegram bot sozlash
-

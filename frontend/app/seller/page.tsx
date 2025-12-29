@@ -101,7 +101,7 @@ export default function SellerPage() {
 
   return (
     <div className="min-h-screen bg-background p-4">
-      {ToastComponent}
+      <ToastComponent />
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Sotuvchi Panel</h1>
@@ -318,4 +318,3 @@ export default function SellerPage() {
     </div>
   );
 }
-

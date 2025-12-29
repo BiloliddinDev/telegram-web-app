@@ -67,6 +67,7 @@
 ## Tugadi! ✅
 
 Endi:
+
 - Frontend: `https://your-frontend.vercel.app`
 - Backend: `https://your-backend.railway.app`
 - Telegram Bot: Web App orqali ishlaydi
@@ -74,20 +75,22 @@ Endi:
 ## Muammo Bo'lsa
 
 ### CORS Xatosi
+
 Backend'da `backend/server.js` faylida:
 
 ```javascript
-app.use(cors({
-  origin: [
-    'https://your-frontend.vercel.app',
-    'http://localhost:3000'
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: ["https://your-frontend.vercel.app", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 ```
 
 ### API URL Xatosi
+
 Frontend `.env.local` yoki Vercel Environment Variables'da:
+
 ```
 NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
 ```
@@ -95,4 +98,3 @@ NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
 ## GitHub Actions (Ixtiyoriy)
 
 Avtomatik deploy qilish uchun `.github/workflows/deploy.yml` yarating (qilingan).
-

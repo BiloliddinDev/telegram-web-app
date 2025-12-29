@@ -69,7 +69,7 @@ Agar backend'ni ham Vercel'da ishga tushirmoqchi bo'lsangiz:
 ### 2. Vercel Project Settings
 
 1. Root Directory: `/` (root)
-2. Build Command: 
+2. Build Command:
    ```bash
    cd frontend && npm install && npm run build
    ```
@@ -155,10 +155,12 @@ Vercel Dashboard > Project > Settings > Environment Variables
 Backend'da CORS sozlang:
 
 ```javascript
-app.use(cors({
-  origin: ['https://your-frontend.vercel.app', 'http://localhost:3000'],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: ["https://your-frontend.vercel.app", "http://localhost:3000"],
+    credentials: true,
+  })
+);
 ```
 
 ### API URL Xatosi
@@ -178,4 +180,3 @@ MongoDB Atlas'da Network Access'ga Vercel IP'larini qo'shing yoki `0.0.0.0/0` qo
 - [ ] CORS sozlangan
 - [ ] Telegram bot URL yangilangan
 - [ ] Test qiling
-
