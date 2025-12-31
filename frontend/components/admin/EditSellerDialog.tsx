@@ -17,11 +17,11 @@ import { Edit } from "lucide-react";
 import { useState } from "react";
 import { useUpdateSeller } from "@/hooks/useAdminData";
 import { useToast } from "@/hooks/useToast";
-import { User } from "@/interface/User.type";
+import { Seller } from "@/interface/seller.type";
 import { AxiosError } from "axios";
 
 interface EditSellerDialogProps {
-  seller: User;
+  seller: Seller;
 }
 
 interface SellerFormValues {

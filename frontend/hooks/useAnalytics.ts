@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { SellerAnalytics } from "@/interface/seller.type";
 
 export interface AnalyticsData {
   summary: {
@@ -7,15 +8,7 @@ export interface AnalyticsData {
     warehouseStockValue: number;
     sellerStockValue: number;
   };
-  sellers: {
-    _id: string;
-    username: string;
-    firstName: string;
-    lastName: string;
-    telegramId: string;
-    totalValue: number;
-    productCount: number;
-  }[];
+  sellers: SellerAnalytics[];
 }
 
 export const useAnalytics = () => {

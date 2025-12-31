@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { User } from "@/interface/User.type";
+import { Seller } from "@/interface/seller.type";
 import { Report } from "@/interface/report.type";
 
 export const useSellers = () => {
-  return useQuery<User[]>({
+  return useQuery<Seller[]>({
     queryKey: ["sellers"],
     queryFn: async () => {
       const { data } = await api.get("/admin/sellers");

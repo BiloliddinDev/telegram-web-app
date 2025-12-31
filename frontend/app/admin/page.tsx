@@ -24,10 +24,9 @@ import { CreateSellerDialog } from "@/components/admin/CreateSellerDialog";
 import { AssignProductDialog } from "@/components/admin/AssignProductDialog";
 import { ProductTable } from "@/components/admin/ProductTable";
 import { Product } from "@/interface/products.type";
-import { User } from "@/interface/User.type";
+import { Seller, SellerAnalytics } from "@/interface/seller.type";
 import { TrendingUp, Users, Package } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { Button } from "@/components/ui/button";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
 
@@ -64,7 +63,7 @@ export default function AdminPage() {
     { name: "Sotuvchilardagi", value: analytics.summary.sellerStockValue },
   ] : [];
 
-  const barData = analytics ? analytics.sellers.map((s: any) => ({
+  const barData = analytics ? analytics.sellers.map((s: SellerAnalytics) => ({
     name: s.firstName || s.username || "Noma'lum",
     value: s.totalValue
   })) : [];
@@ -127,7 +126,7 @@ export default function AdminPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  {sellers.map((seller: User) => (
+                  {sellers.map((seller: Seller) => (
                     <SellerCard key={seller._id} seller={seller} />
                   ))}
                 </div>
@@ -282,7 +281,7 @@ export default function AdminPage() {
                   Sotuvchilar statistikasi
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {analytics.sellers.map((seller: any) => (
+                  {analytics.sellers.map((seller: SellerAnalytics) => (
                     <Card key={seller._id}>
                       <CardHeader>
                         <CardTitle className="text-lg">{seller.firstName} {seller.lastName}</CardTitle>

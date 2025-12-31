@@ -1,13 +1,13 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { User } from "@/interface/User.type";
+import { Seller } from "@/interface/seller.type";
 import { Button } from "@/components/ui/button";
 import { Trash2, Phone, User as UserIcon } from "lucide-react";
 import { useDeleteSeller } from "@/hooks/useAdminData";
 import { useToast } from "@/hooks/useToast";
 import { EditSellerDialog } from "@/components/admin/EditSellerDialog";
 
-export function SellerCard({ seller }: { seller: User }) {
+export function SellerCard({ seller }: { seller: Seller }) {
   const { mutate: deleteSeller, isPending: isDeleting } = useDeleteSeller();
   const { showToast } = useToast();
 
