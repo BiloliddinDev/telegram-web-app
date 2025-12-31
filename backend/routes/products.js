@@ -38,15 +38,18 @@ router.get("/:id", authenticate, async (req, res) => {
 // Create product (admin only)
 router.post("/", authenticate, isAdmin, validateProduct, async (req, res) => {
   try {
-    const { name, description, price, category, stock, image } = req.body;
+    const { name, description, price, costPrice, category, stock, image, sku, color } = req.body;
 
     const product = await Product.create({
       name,
       description,
       price,
+      costPrice,
       category,
       stock,
       image,
+      sku,
+      color,
     });
 
     res.status(201).json({ product });
@@ -58,12 +61,12 @@ router.post("/", authenticate, isAdmin, validateProduct, async (req, res) => {
 // Update product (admin only)
 router.put("/:id", authenticate, isAdmin, validateProduct, async (req, res) => {
   try {
-    const { name, description, price, category, stock, image, isActive } =
+    const { name, description, price, costPrice, category, stock, image, sku, color, isActive } =
       req.body;
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,
-      { name, description, price, category, stock, image, isActive },
+      { name, description, price, costPrice, category, stock, image, sku, color, isActive },
       { new: true }
     );
 

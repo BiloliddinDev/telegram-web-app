@@ -12,12 +12,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Edit } from "lucide-react";
 import { useState } from "react";
-import { useCreateProduct, useCategories } from "@/hooks/useProducts";
+import { useUpdateProduct, useCategories } from "@/hooks/useProducts";
 import { useToast } from "@/hooks/useToast";
+import { Product } from "@/interface/products.type";
 import { Category } from "@/interface/category.type";
 import { AxiosError } from "axios";
+
+interface EditProductDialogProps {
+  product: Product;
+}
 
 interface ProductFormValues {
   name: string;
@@ -30,19 +35,30 @@ interface ProductFormValues {
   color: string;
 }
 
-export function CreateProductDialog() {
+export function EditProductDialog({ product }: EditProductDialogProps) {
   const [open, setOpen] = useState(false);
-  const { register, handleSubmit, reset } = useForm<ProductFormValues>();
-  const { mutate: createProduct, isPending } = useCreateProduct();
+  const { register, handleSubmit } = useForm<ProductFormValues>({
+    defaultValues: {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      costPrice: product.costPrice,
+      category: product.category,
+      stock: product.stock,
+      sku: product.sku,
+      color: product.color,
+    }
+  });
+  
+  const { mutate: updateProduct, isPending } = useUpdateProduct();
   const { data: categories = [] } = useCategories();
   const { showToast } = useToast();
 
   const onSubmit = (data: ProductFormValues) => {
-    createProduct(data, {
+    updateProduct({ id: product._id, data }, {
       onSuccess: () => {
-        showToast("Mahsulot muvaffaqiyatli qo'shildi", "success");
+        showToast("Mahsulot muvaffaqiyatli tahrirlandi", "success");
         setOpen(false);
-        reset();
       },
       onError: (error: unknown) => {
         const axiosError = error as AxiosError<{ error: string }>;
@@ -54,38 +70,37 @@ export function CreateProductDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex-1">
-          <Plus className="mr-2 h-4 w-4" />
-          Mahsulot
+        <Button variant="outline" size="icon">
+          <Edit className="h-4 w-4" />
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Yangi mahsulot qo&apos;shish</DialogTitle>
+            <DialogTitle>Mahsulotni tahrirlash</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Nomi</Label>
-              <Input id="name" {...register("name", { required: true })} />
+              <Label htmlFor="edit-name">Nomi</Label>
+              <Input id="edit-name" {...register("name", { required: true })} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Tavsif</Label>
-              <Input id="description" {...register("description")} />
+              <Label htmlFor="edit-description">Tavsif</Label>
+              <Input id="edit-description" {...register("description")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="costPrice">Tan narxi</Label>
+                <Label htmlFor="edit-costPrice">Tan narxi</Label>
                 <Input
-                  id="costPrice"
+                  id="edit-costPrice"
                   type="number"
                   {...register("costPrice", { required: true, valueAsNumber: true })}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="price">Sotuv narxi</Label>
+                <Label htmlFor="edit-price">Sotuv narxi</Label>
                 <Input
-                  id="price"
+                  id="edit-price"
                   type="number"
                   {...register("price", { required: true, valueAsNumber: true })}
                 />
@@ -93,18 +108,18 @@ export function CreateProductDialog() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="sku">SKU / Maxsus nom</Label>
-                <Input id="sku" {...register("sku")} />
+                <Label htmlFor="edit-sku">SKU / Maxsus nom</Label>
+                <Input id="edit-sku" {...register("sku")} />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="color">Rang</Label>
-                <Input id="color" {...register("color")} />
+                <Label htmlFor="edit-color">Rang</Label>
+                <Input id="edit-color" {...register("color")} />
               </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="category">Kategoriya</Label>
+              <Label htmlFor="edit-category">Kategoriya</Label>
               <select 
-                id="category" 
+                id="edit-category" 
                 {...register("category", { required: true })}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -116,9 +131,9 @@ export function CreateProductDialog() {
               </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="stock">Ombordagi miqdor</Label>
+              <Label htmlFor="edit-stock">Ombordagi miqdor</Label>
               <Input
-                id="stock"
+                id="edit-stock"
                 type="number"
                 {...register("stock", { required: true, valueAsNumber: true })}
               />
@@ -126,7 +141,7 @@ export function CreateProductDialog() {
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Qo'shilmoqda..." : "Qo'shish"}
+              {isPending ? "Saqlanmoqda..." : "Saqlash"}
             </Button>
           </DialogFooter>
         </form>

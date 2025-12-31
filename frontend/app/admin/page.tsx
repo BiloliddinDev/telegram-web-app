@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { useProducts } from "@/hooks/useProducts";
 import { useSellers, useReports } from "@/hooks/useAdminData";
@@ -20,6 +21,7 @@ import { CreateProductDialog } from "@/components/admin/CreateProductDialog";
 import { CreateCategoryDialog } from "@/components/admin/CreateCategoryDialog";
 import { CreateSellerDialog } from "@/components/admin/CreateSellerDialog";
 import { AssignProductDialog } from "@/components/admin/AssignProductDialog";
+import { ProductTable } from "@/components/admin/ProductTable";
 import { Product } from "@/interface/products.type";
 import { User } from "@/interface/User.type";
 
@@ -33,6 +35,12 @@ export default function AdminPage() {
   const { data: reports, isLoading: reportsLoading } = useReports();
   
   const [activeTab, setActiveTab] = useState("products");
+  const [assignSearch, setAssignSearch] = useState("");
+
+  const filteredAssignProducts = products.filter(p => 
+    p.name.toLowerCase().includes(assignSearch.toLowerCase()) ||
+    p.sku?.toLowerCase().includes(assignSearch.toLowerCase())
+  );
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -80,11 +88,7 @@ export default function AdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product: Product) => (
-                    <ProductCard key={product._id} product={product} />
-                  ))}
-                </div>
+                <ProductTable products={products} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -172,8 +176,15 @@ export default function AdminPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <Input 
+                    placeholder="Mahsulotni qidirish..." 
+                    value={assignSearch}
+                    onChange={(e) => setAssignSearch(e.target.value)}
+                  />
+                </div>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product: Product) => (
+                  {filteredAssignProducts.map((product: Product) => (
                     <ProductCard 
                       key={product._id} 
                       product={product} 

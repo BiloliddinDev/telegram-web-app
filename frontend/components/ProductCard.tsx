@@ -1,13 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface Product {
-  _id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  stock: number;
-}
+import { Product } from "@/interface/products.type";
 
 interface ProductCardProps {
   product: Product;

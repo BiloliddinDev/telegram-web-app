@@ -1,12 +1,16 @@
 const validateProduct = (req, res, next) => {
-  const { name, price, stock } = req.body;
+  const { name, price, costPrice, stock } = req.body;
 
   if (!name || name.trim().length === 0) {
     return res.status(400).json({ error: "Mahsulot nomi majburiy" });
   }
 
   if (!price || isNaN(price) || price <= 0) {
-    return res.status(400).json({ error: "To'g'ri narx kiriting" });
+    return res.status(400).json({ error: "To'g'ri sotuv narxini kiriting" });
+  }
+
+  if (costPrice !== undefined && (isNaN(costPrice) || costPrice < 0)) {
+    return res.status(400).json({ error: "To'g'ri tan narxini kiriting" });
   }
 
   if (stock !== undefined && (isNaN(stock) || stock < 0)) {

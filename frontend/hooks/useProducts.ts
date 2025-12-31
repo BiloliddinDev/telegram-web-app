@@ -26,6 +26,32 @@ export const useCreateProduct = () => {
   });
 };
 
+export const useUpdateProduct = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Product> }) => {
+      const response = await api.put(`/products/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};
+
+export const useDeleteProduct = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.delete(`/products/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};
+
 export const useCategories = () => {
   return useQuery<Category[]>({
     queryKey: ["categories"],

@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { useSellerProducts, useSellerSales, useSellerReports } from "@/hooks/useSellerData";
 import { ProductCard } from "@/components/ProductCard";
@@ -29,6 +30,12 @@ export default function SellerPage() {
   const { data: reports, isLoading: reportsLoading } = useSellerReports();
   
   const [activeTab, setActiveTab] = useState("products");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.sku?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     if (user && user.role !== "seller") {
@@ -67,13 +74,20 @@ export default function SellerPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                <div className="mb-4">
+                  <Input 
+                    placeholder="Mahsulotni qidirish..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
                 <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.length === 0 ? (
-                    <p className="text-muted-foreground">
-                      Sizga hali mahsulot biriktirilmagan
+                  {filteredProducts.length === 0 ? (
+                    <p className="text-muted-foreground col-span-full text-center py-4">
+                      Mahsulot topilmadi
                     </p>
                   ) : (
-                    products.map((product: Product) => (
+                    filteredProducts.map((product: Product) => (
                       <ProductCard 
                         key={product._id} 
                         product={product} 
