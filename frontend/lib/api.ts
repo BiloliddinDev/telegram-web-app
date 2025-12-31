@@ -90,7 +90,8 @@ export const getTelegramUserId = (): string | null => {
     }
   }
 
-  return null;
+  // VAQTINCHALIK: Test uchun default ID qaytarish
+  return "test_user";
 };
 
 // Create axios instance with default config

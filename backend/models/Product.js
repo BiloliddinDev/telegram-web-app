@@ -14,9 +14,22 @@ const productSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  costPrice: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   category: {
     type: String,
     default: "general",
+  },
+  sku: {
+    type: String,
+    default: "",
+  },
+  color: {
+    type: String,
+    default: "",
   },
   stock: {
     type: Number,

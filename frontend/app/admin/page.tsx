@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+import { Plus, Search, Edit2, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/useToast";
 import { AxiosError } from "axios";
 
@@ -32,7 +32,10 @@ interface Product {
   name: string;
   description: string;
   price: number;
+  costPrice: number;
   category: string;
+  sku: string;
+  color: string;
   stock: number;
   image: string;
   assignedSellers: string[];
@@ -92,11 +95,19 @@ export default function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("products");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isSellerModalOpen, setIsSellerModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.category.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   
   console.log(loading, "loading");
 
@@ -143,7 +154,10 @@ export default function AdminPage() {
         name: formData.get("name"),
         description: formData.get("description"),
         price: parseFloat(formData.get("price") as string),
+        costPrice: parseFloat(formData.get("costPrice") as string),
         category: formData.get("category"),
+        sku: formData.get("sku"),
+        color: formData.get("color"),
         stock: parseInt(formData.get("stock") as string),
       });
       showToast("Mahsulot muvaffaqiyatli qo'shildi", "success");
@@ -155,6 +169,53 @@ export default function AdminPage() {
       showToast(
         (axiosError.response?.data as { error?: string })?.error ||
           "Mahsulot qo'shishda xatolik",
+        "error"
+      );
+    }
+  };
+
+  const handleUpdateProduct = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+    const formData = new FormData(e.currentTarget);
+    try {
+      await api.put(`/products/${selectedProduct._id}`, {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        price: parseFloat(formData.get("price") as string),
+        costPrice: parseFloat(formData.get("costPrice") as string),
+        category: formData.get("category"),
+        sku: formData.get("sku"),
+        color: formData.get("color"),
+        stock: parseInt(formData.get("stock") as string),
+        isActive: formData.get("isActive") === "true",
+      });
+      showToast("Mahsulot muvaffaqiyatli yangilandi", "success");
+      setIsEditModalOpen(false);
+      loadData();
+    } catch (error: unknown) {
+      console.error("Error updating product:", error);
+      const axiosError = error as AxiosError;
+      showToast(
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Mahsulotni yangilashda xatolik",
+        "error"
+      );
+    }
+  };
+
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm("Haqiqatan ham ushbu mahsulotni o'chirmoqchimisiz?")) return;
+    try {
+      await api.delete(`/products/${id}`);
+      showToast("Mahsulot muvaffaqiyatli o'chirildi", "success");
+      loadData();
+    } catch (error: unknown) {
+      console.error("Error deleting product:", error);
+      const axiosError = error as AxiosError;
+      showToast(
+        (axiosError.response?.data as { error?: string })?.error ||
+          "Mahsulotni o'chirishda xatolik",
         "error"
       );
     }
@@ -263,10 +324,20 @@ export default function AdminPage() {
                       Barcha mahsulotlarni boshqaring
                     </CardDescription>
                   </div>
-                  <div className="flex gap-2 w-full md:w-auto">
+                  <div className="flex flex-wrap gap-2 w-full md:w-auto">
+                    <div className="relative flex-1 md:w-64">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Qidirish..."
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                    
                     <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
                       <DialogTrigger asChild>
-                        <Button variant="outline" className="flex-1">
+                        <Button variant="outline">
                           <Plus className="mr-2 h-4 w-4" />
                           Kategoriya
                         </Button>
@@ -291,56 +362,63 @@ export default function AdminPage() {
 
                     <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
                       <DialogTrigger asChild>
-                        <Button className="flex-1">
+                        <Button>
                           <Plus className="mr-2 h-4 w-4" />
                           Mahsulot
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[425px]">
+                      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
                         <form onSubmit={handleCreateProduct}>
                           <DialogHeader>
                             <DialogTitle>Yangi mahsulot qo&apos;shish</DialogTitle>
                           </DialogHeader>
                           <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
-                              <Label htmlFor="name">Nomi</Label>
-                              <Input id="name" name="name" required />
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="grid gap-2">
+                                <Label htmlFor="name">Nomi</Label>
+                                <Input id="name" name="name" required />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="sku">SKU/Maxsus nomi</Label>
+                                <Input id="sku" name="sku" placeholder="P-100" />
+                              </div>
                             </div>
                             <div className="grid gap-2">
                               <Label htmlFor="description">Tavsif</Label>
                               <Input id="description" name="description" />
                             </div>
-                            <div className="grid gap-2">
-                              <Label htmlFor="price">Narxi</Label>
-                              <Input
-                                id="price"
-                                name="price"
-                                type="number"
-                                step="0.01"
-                                required
-                              />
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="grid gap-2">
+                                <Label htmlFor="costPrice">Tan narxi</Label>
+                                <Input id="costPrice" name="costPrice" type="number" required />
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="price">Sotuv narxi</Label>
+                                <Input id="price" name="price" type="number" required />
+                              </div>
                             </div>
-                            <div className="grid gap-2">
-                              <Label htmlFor="category">Kategoriya</Label>
-                              <select 
-                                id="category" 
-                                name="category" 
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              >
-                                {categories.map(cat => (
-                                  <option key={cat._id} value={cat.name}>{cat.name}</option>
-                                ))}
-                                {categories.length === 0 && <option value="general">Umumiy</option>}
-                              </select>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="grid gap-2">
+                                <Label htmlFor="category">Kategoriya</Label>
+                                <select 
+                                  id="category" 
+                                  name="category" 
+                                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  {categories.map(cat => (
+                                    <option key={cat._id} value={cat.name}>{cat.name}</option>
+                                  ))}
+                                  {categories.length === 0 && <option value="general">Umumiy</option>}
+                                </select>
+                              </div>
+                              <div className="grid gap-2">
+                                <Label htmlFor="color">Rangi</Label>
+                                <Input id="color" name="color" placeholder="Oq, Qora..." />
+                              </div>
                             </div>
                             <div className="grid gap-2">
                               <Label htmlFor="stock">Ombordagi miqdor</Label>
-                              <Input
-                                id="stock"
-                                name="stock"
-                                type="number"
-                                required
-                              />
+                              <Input id="stock" name="stock" type="number" required />
                             </div>
                           </div>
                           <DialogFooter>
@@ -353,33 +431,151 @@ export default function AdminPage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {products.map((product) => (
-                    <Card key={product._id} className="overflow-hidden">
-                      <CardHeader className="p-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle className="text-lg">{product.name}</CardTitle>
-                            <CardDescription className="line-clamp-2">{product.description}</CardDescription>
-                          </div>
-                          <span className="text-xs bg-secondary px-2 py-1 rounded">
-                            {product.category}
-                          </span>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0">
-                        <p className="text-xl font-bold">
-                          {product.price.toLocaleString()} so&apos;m
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Omborda: {product.stock}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="rounded-md border overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b bg-muted/50 text-left font-medium">
+                        <th className="p-3">SKU</th>
+                        <th className="p-3">Nomi</th>
+                        <th className="p-3">Kategoriya</th>
+                        <th className="p-3">Tan narxi</th>
+                        <th className="p-3">Sotuv narxi</th>
+                        <th className="p-3">Qoldiq</th>
+                        <th className="p-3 text-right">Amallar</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.map((product) => (
+                        <tr key={product._id} className="border-b hover:bg-muted/50 transition-colors">
+                          <td className="p-3 font-mono text-xs">{product.sku || "-"}</td>
+                          <td className="p-3">
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-xs text-muted-foreground">{product.color}</div>
+                          </td>
+                          <td className="p-3">
+                            <span className="bg-secondary px-2 py-0.5 rounded text-xs">
+                              {product.category}
+                            </span>
+                          </td>
+                          <td className="p-3">{(product.costPrice || 0).toLocaleString()}</td>
+                          <td className="p-3 font-bold">{(product.price || 0).toLocaleString()}</td>
+                          <td className={`p-3 font-medium ${product.stock <= 5 ? "text-red-500" : ""}`}>
+                            {product.stock}
+                          </td>
+                          <td className="p-3 text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => {
+                                  setSelectedProduct(product);
+                                  setIsEditModalOpen(true);
+                                }}
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => handleDeleteProduct(product._id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredProducts.length === 0 && (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                            Mahsulotlar topilmadi
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
+
+            {/* Edit Product Modal */}
+            <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[500px]">
+                {selectedProduct && (
+                  <form onSubmit={handleUpdateProduct}>
+                    <DialogHeader>
+                      <DialogTitle>Mahsulotni tahrirlash</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-name">Nomi</Label>
+                          <Input id="edit-name" name="name" defaultValue={selectedProduct.name} required />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-sku">SKU/Maxsus nomi</Label>
+                          <Input id="edit-sku" name="sku" defaultValue={selectedProduct.sku} placeholder="P-100" />
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-description">Tavsif</Label>
+                        <Input id="edit-description" name="description" defaultValue={selectedProduct.description} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-costPrice">Tan narxi</Label>
+                          <Input id="edit-costPrice" name="costPrice" type="number" defaultValue={selectedProduct.costPrice} required />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-price">Sotuv narxi</Label>
+                          <Input id="edit-price" name="price" type="number" defaultValue={selectedProduct.price} required />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-category">Kategoriya</Label>
+                          <select 
+                            id="edit-category" 
+                            name="category" 
+                            defaultValue={selectedProduct.category}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {categories.map(cat => (
+                              <option key={cat._id} value={cat.name}>{cat.name}</option>
+                            ))}
+                            <option value="general">Umumiy</option>
+                          </select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="edit-color">Rangi</Label>
+                          <Input id="edit-color" name="color" defaultValue={selectedProduct.color} placeholder="Oq, Qora..." />
+                        </div>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-stock">Ombordagi miqdor</Label>
+                        <Input id="edit-stock" name="stock" type="number" defaultValue={selectedProduct.stock} required />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="edit-isActive">Holati</Label>
+                        <select 
+                          id="edit-isActive" 
+                          name="isActive" 
+                          defaultValue={selectedProduct.isActive.toString()}
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="true">Faol</option>
+                          <option value="false">Nofaol</option>
+                        </select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit">Saqlash</Button>
+                    </DialogFooter>
+                  </form>
+                )}
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           <TabsContent value="sellers" className="mt-4">

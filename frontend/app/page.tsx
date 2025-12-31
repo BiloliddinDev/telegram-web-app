@@ -41,22 +41,20 @@ export default function Home() {
 
           // Fetch user data
           console.log("Fetching user...");
-          await fetchUser();
-          console.log("User fetch completed");
+          try {
+            await fetchUser();
+            console.log("User fetch completed");
+          } catch (err: unknown) {
+            console.error("fetchUser error in Telegram environment:", err);
+            // Don't setInitError here yet, maybe it's a temporary API issue
+          }
         } else {
-          console.log("Not in Telegram environment, window.location.href:", window.location.href);
-          const isTelegram =
-            window.location.href.includes("t.me") ||
-            window.location.href.includes("telegram.org");
-
-          if (!isTelegram) {
-            setInitError(
-              "Bu ilova faqat Telegram orqali ishlaydi. Telegram bot orqali kirish."
-            );
-          } else {
-            setInitError(
-              "Telegram WebApp yuklanmadi. Qaytadan urinib ko'ring."
-            );
+          // VAQTINCHALIK: Test rejimida Telegram muhitidan tashqarida ham ishlash
+          console.log("Not in Telegram environment, using fallback ID");
+          try {
+            await fetchUser();
+          } catch (err: unknown) {
+            console.error("fetchUser error in Fallback environment:", err);
           }
         }
       } catch (err: unknown) {
@@ -92,7 +90,7 @@ export default function Home() {
     );
   }
 
-  if (initError || error) {
+  if (initError || (error && !loading)) {
     console.log("Rendering error state:", initError || error);
     return (
       <div className="flex items-center justify-center min-h-screen bg-background p-4">
@@ -114,12 +112,23 @@ export default function Home() {
           </div>
           <h2 className="text-xl font-semibold mb-2">Xatolik</h2>
           <p className="text-muted-foreground mb-4">{initError || error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            Qaytadan yuklash
-          </button>
+          <div className="flex flex-col gap-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Qaytadan yuklash
+            </button>
+            <button
+              onClick={() => {
+                console.log("Forcing fetchUser...");
+                fetchUser();
+              }}
+              className="text-xs text-muted-foreground underline"
+            >
+              Qayta urinib ko&apos;rish
+            </button>
+          </div>
         </div>
       </div>
     );
