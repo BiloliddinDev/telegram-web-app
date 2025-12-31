@@ -24,6 +24,9 @@ import { AssignProductDialog } from "@/components/admin/AssignProductDialog";
 import { ProductTable } from "@/components/admin/ProductTable";
 import { Product } from "@/interface/products.type";
 import { User } from "@/interface/User.type";
+import { TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function AdminPage() {
   const router = useRouter();
@@ -56,11 +59,19 @@ export default function AdminPage() {
     <div className="min-h-screen bg-background p-4">
       <ToastComponent />
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Admin Panel</h1>
-          <p className="text-muted-foreground">
-            Salom, {user?.firstName || user?.username || "Admin"}!
-          </p>
+        <div className="mb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-bold">Admin Panel</h1>
+            <p className="text-muted-foreground">
+              Salom, {user?.firstName || user?.username || "Admin"}!
+            </p>
+          </div>
+          <Link href="/admin/analytics">
+            <Button variant="outline" className="flex gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Analytics
+            </Button>
+          </Link>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>

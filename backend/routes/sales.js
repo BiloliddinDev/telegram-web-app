@@ -29,8 +29,15 @@ router.post("/", authenticate, validateSale, async (req, res) => {
     }
 
     // Check stock
-    if (product.stock < quantity) {
-      return res.status(400).json({ error: "Insufficient stock" });
+    if (req.user.role === "seller") {
+      const sellerStock = product.sellerStocks.find(
+        (s) => s.seller.toString() === req.user._id.toString()
+      );
+      if (!sellerStock || sellerStock.quantity < quantity) {
+        return res.status(400).json({ error: "Sizda yetarli mahsulot yo'q" });
+      }
+    } else if (product.stock < quantity) {
+      return res.status(400).json({ error: "Omborda yetarli mahsulot yo'q" });
     }
 
     const totalAmount = price * quantity;
@@ -46,8 +53,15 @@ router.post("/", authenticate, validateSale, async (req, res) => {
       notes,
     });
 
-    // Update product stock
-    product.stock -= quantity;
+    // Update stocks
+    if (req.user.role === "seller") {
+      const sellerStockIndex = product.sellerStocks.findIndex(
+        (s) => s.seller.toString() === req.user._id.toString()
+      );
+      product.sellerStocks[sellerStockIndex].quantity -= quantity;
+    } else {
+      product.stock -= quantity;
+    }
     await product.save();
 
     const populatedSale = await Sale.findById(sale._id)

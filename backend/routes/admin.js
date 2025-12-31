@@ -119,6 +119,20 @@ router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
     // Reduce stock if quantity provided
     if (assignQuantity > 0) {
       product.stock -= assignQuantity;
+      
+      // Update seller's stock for this product
+      const sellerStockIndex = product.sellerStocks.findIndex(
+        (s) => s.seller.toString() === seller._id.toString()
+      );
+      
+      if (sellerStockIndex > -1) {
+        product.sellerStocks[sellerStockIndex].quantity += assignQuantity;
+      } else {
+        product.sellerStocks.push({
+          seller: seller._id,
+          quantity: assignQuantity
+        });
+      }
     }
     await product.save();
 
