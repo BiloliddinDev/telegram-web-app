@@ -21,7 +21,8 @@ import { SellerCard } from "@/components/SellerCard";
 import { CreateProductDialog } from "@/components/admin/CreateProductDialog";
 import { CreateCategoryDialog } from "@/components/admin/CreateCategoryDialog";
 import { CreateSellerDialog } from "@/components/admin/CreateSellerDialog";
-import { AssignProductDialog } from "@/components/admin/AssignProductDialog";
+import { StockTransferModule } from "@/components/admin/StockTransferModule";
+import { TransferHistoryTable } from "@/components/admin/TransferHistoryTable";
 import { ProductTable } from "@/components/admin/ProductTable";
 import { Product } from "@/interface/products.type";
 import { Seller, SellerAnalytics } from "@/interface/seller.type";
@@ -41,12 +42,6 @@ export default function AdminPage() {
   const { data: analytics, isLoading: analyticsLoading } = useAnalytics();
   
   const [activeTab, setActiveTab] = useState("products");
-  const [assignSearch, setAssignSearch] = useState("");
-
-  const filteredAssignProducts = products.filter(p => 
-    p.name.toLowerCase().includes(assignSearch.toLowerCase()) ||
-    p.sku?.toLowerCase().includes(assignSearch.toLowerCase())
-  );
 
   useEffect(() => {
     if (user && user.role !== "admin") {
@@ -308,31 +303,28 @@ export default function AdminPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="assign" className="mt-4">
+          <TabsContent value="assign" className="mt-4 space-y-8">
             <Card>
               <CardHeader>
-                <CardTitle>Mahsulotni sotuvchiga biriktirish</CardTitle>
+                <CardTitle>Mahsulotlarni taqsimlash (Stock Transfer)</CardTitle>
                 <CardDescription>
-                  Mahsulot va sotuvchini tanlang
+                  Ombordan sotuvchilarga mahsulot biriktirish
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
-                  <Input 
-                    placeholder="Mahsulotni qidirish..." 
-                    value={assignSearch}
-                    onChange={(e) => setAssignSearch(e.target.value)}
-                  />
-                </div>
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredAssignProducts.map((product: Product) => (
-                    <ProductCard 
-                      key={product._id} 
-                      product={product} 
-                      footer={<AssignProductDialog product={product} />}
-                    />
-                  ))}
-                </div>
+                <StockTransferModule />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Transferlar tarixi</CardTitle>
+                <CardDescription>
+                  Barcha amalga oshirilgan transferlar va qaytarmalar
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TransferHistoryTable />
               </CardContent>
             </Card>
           </TabsContent>

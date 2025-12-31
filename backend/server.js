@@ -87,6 +87,7 @@ app.use("/api/categories", require("./routes/categories"));
 app.use("/api/sales", require("./routes/sales"));
 app.use("/api/reports", require("./routes/reports"));
 app.use("/api/analytics", require("./routes/analytics"));
+app.use("/api/transfers", require("./routes/transfers"));
 
 app.get("/api/health", (req, res) => {
     res.json({ status: "OK", message: "Server is running" });
