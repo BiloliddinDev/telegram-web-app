@@ -10,7 +10,7 @@ import { useCreateTransfer } from "@/hooks/useTransfers";
 import { useToast } from "@/hooks/useToast";
 import { Seller } from "@/interface/seller.type";
 import { Product } from "@/interface/products.type";
-import { Search, Plus, Minus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, Package, User as UserIcon } from "lucide-react";
+import { Search, Plus, Minus, Trash2, CheckCircle2, ChevronRight, ChevronLeft, User as UserIcon } from "lucide-react";
 import { AxiosError } from "axios";
 
 export function StockTransferModule() {
@@ -176,7 +176,7 @@ export function StockTransferModule() {
                     onClick={() => addToBasket(product)}
                     disabled={product.stock === 0}
                   >
-                    <Plus className="mr-2 h-4 w-4" /> Qo'shish
+                    <Plus className="mr-2 h-4 w-4" /> Qo&apos;shish
                   </Button>
                 </CardContent>
               </Card>
@@ -243,7 +243,7 @@ export function StockTransferModule() {
               <ChevronLeft className="mr-2 h-4 w-4" /> Orqaga
             </Button>
             <Button onClick={() => setStep(4)}>
-              Ko'rib chiqish <ChevronRight className="ml-2 h-4 w-4" />
+              Ko&apos;rib chiqish <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -255,7 +255,7 @@ export function StockTransferModule() {
           <Card className="bg-primary/5 border-primary/20">
             <CardHeader>
               <CardTitle>Transferni tasdiqlang</CardTitle>
-              <CardDescription>Barcha ma'lumotlar to'g'riligini tekshiring</CardDescription>
+              <CardDescription>Barcha ma&apos;lumotlar to&apos;g&apos;riligini tekshiring</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4 p-3 bg-background rounded-lg border">
@@ -269,7 +269,7 @@ export function StockTransferModule() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Mahsulotlar ro'yxati</p>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Mahsulotlar ro&apos;yxati</p>
                 <div className="border rounded-lg divide-y bg-background">
                   {basket.map((item) => (
                     <div key={item.product._id} className="p-3 flex justify-between items-center">

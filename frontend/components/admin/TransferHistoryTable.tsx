@@ -8,6 +8,7 @@ import { Edit, RotateCcw, Check, X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
+import { AxiosError } from "axios";
 
 export function TransferHistoryTable() {
   const { data, isLoading } = useTransfers();
@@ -33,8 +34,9 @@ export function TransferHistoryTable() {
         showToast("Transfer yangilandi", "success");
         setEditingId(null);
       },
-      onError: (err: any) => {
-        showToast(err.response?.data?.error || "Xatolik", "error");
+      onError: (err: unknown) => {
+        const axiosError = err as AxiosError<{ error: string }>;
+        showToast(axiosError.response?.data?.error || "Xatolik", "error");
       }
     });
   };
@@ -45,8 +47,9 @@ export function TransferHistoryTable() {
         onSuccess: () => {
           showToast("Mahsulot qaytarildi", "success");
         },
-        onError: (err: any) => {
-          showToast(err.response?.data?.error || "Xatolik", "error");
+        onError: (err: unknown) => {
+          const axiosError = err as AxiosError<{ error: string }>;
+          showToast(axiosError.response?.data?.error || "Xatolik", "error");
         }
       });
     }
@@ -69,7 +72,7 @@ export function TransferHistoryTable() {
           {transfers.length === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                Hali transferlar yo'q
+                Hali transferlar yo&apos;q
               </TableCell>
             </TableRow>
           ) : (

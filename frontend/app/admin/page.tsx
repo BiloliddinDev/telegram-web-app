@@ -11,12 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/useToast";
 import { useProducts } from "@/hooks/useProducts";
 import { useSellers, useReports } from "@/hooks/useAdminData";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { ProductCard } from "@/components/ProductCard";
 import { SellerCard } from "@/components/SellerCard";
 import { CreateProductDialog } from "@/components/admin/CreateProductDialog";
 import { CreateCategoryDialog } from "@/components/admin/CreateCategoryDialog";
@@ -24,7 +22,6 @@ import { CreateSellerDialog } from "@/components/admin/CreateSellerDialog";
 import { StockTransferModule } from "@/components/admin/StockTransferModule";
 import { TransferHistoryTable } from "@/components/admin/TransferHistoryTable";
 import { ProductTable } from "@/components/admin/ProductTable";
-import { Product } from "@/interface/products.type";
 import { Seller, SellerAnalytics } from "@/interface/seller.type";
 import { TrendingUp, Users, Package } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
