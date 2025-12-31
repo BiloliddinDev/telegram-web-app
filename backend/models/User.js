@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
   },
   phoneNumber: {
     type: String,
-    default: "",
+    unique: true,
+    sparse: true,
   },
   avatarUrl: {
     type: String,

@@ -21,7 +21,24 @@ mongoose
         useNewUrlParser: true,
         useUnifiedTopology: true,
     })
-    .then(() => console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop()))
+    .then(async () => {
+        console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop());
+        // Eski va xato indekslarni o'chirish (agar mavjud bo'lsa)
+        try {
+            const User = require("./models/User");
+            
+            // Bo'sh stringli phoneNumber'larni tozalash (unique indeks ishlashi uchun)
+            await User.updateMany(
+                { phoneNumber: "" },
+                { $unset: { phoneNumber: "" } }
+            );
+
+            await User.collection.dropIndex("phone_1");
+            console.log("Old 'phone_1' index dropped and empty phoneNumbers cleaned");
+        } catch (e) {
+            // Indeks mavjud bo'lmasa yoki boshqa xato bo'lsa ham davom etamiz
+        }
+    })
     .catch((err) => {
         console.error("MongoDB connection error details:", err);
         process.exit(1);
