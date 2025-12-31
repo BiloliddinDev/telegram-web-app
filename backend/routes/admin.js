@@ -25,20 +25,29 @@ router.get("/sellers", async (req, res) => {
 });
 
 // Create new seller
-router.post("/sellers", async (req, res) => {
+router.post("/sellers", validateSeller, async (req, res) => {
   try {
     const { telegramId, username, firstName, lastName, phoneNumber } = req.body;
 
-    const existingUser = await User.findOne({ telegramId });
-    if (existingUser) {
-      return res.status(400).json({ error: "Foydalanuvchi allaqachon mavjud" });
+    // If telegramId is provided, check for existing user
+    if (telegramId) {
+      const existingUser = await User.findOne({ telegramId });
+      if (existingUser) {
+        return res.status(400).json({ error: "Foydalanuvchi (Telegram ID) allaqachon mavjud" });
+      }
+    }
+
+    // Check for existing user by phone number
+    const existingPhone = await User.findOne({ phoneNumber });
+    if (existingPhone) {
+      return res.status(400).json({ error: "Telefon raqami allaqachon mavjud" });
     }
 
     const seller = await User.create({
-      telegramId,
-      username,
-      firstName,
-      lastName,
+      telegramId: telegramId || null,
+      username: username || "",
+      firstName: firstName || "",
+      lastName: lastName || "",
       phoneNumber,
       role: "seller",
     });

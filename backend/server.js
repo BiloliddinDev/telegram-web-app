@@ -26,6 +26,29 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
     polling: !isProduction
 });
 
+// Bot commands
+bot.setMyCommands([
+    { command: "start", description: "Botni ishga tushirish" },
+    { command: "help", description: "Yordam olish" },
+    { command: "status", description: "Sotuvlar holatini tekshirish" }
+]);
+
+bot.onText(/\/start/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "Assalomu alaykum! Web app orqali do'koningizni boshqarishingiz mumkin.", {
+        reply_markup: {
+            inline_keyboard: [
+                [
+                    {
+                        text: "Ilovani ochish",
+                        web_app: { url: process.env.FRONTEND_URL || "https://your-app.vercel.app" }
+                    }
+                ]
+            ]
+        }
+    });
+});
+
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/admin", require("./routes/admin"));
 app.use("/api/seller", require("./routes/seller"));

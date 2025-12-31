@@ -406,8 +406,8 @@ export default function AdminPage() {
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                           <div className="grid gap-2">
-                            <Label htmlFor="telegramId">Telegram ID</Label>
-                            <Input id="telegramId" name="telegramId" required />
+                            <Label htmlFor="telegramId">Telegram ID (ixtiyoriy)</Label>
+                            <Input id="telegramId" name="telegramId" />
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="username">Username</Label>
@@ -423,7 +423,7 @@ export default function AdminPage() {
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="phoneNumber">Telefon raqam</Label>
-                            <Input id="phoneNumber" name="phoneNumber" placeholder="+998901234567" />
+                            <Input id="phoneNumber" name="phoneNumber" placeholder="+998901234567" required />
                           </div>
                         </div>
                         <DialogFooter>

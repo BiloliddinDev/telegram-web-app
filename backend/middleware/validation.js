@@ -35,10 +35,10 @@ const validateSale = (req, res, next) => {
 };
 
 const validateSeller = (req, res, next) => {
-  const { telegramId } = req.body;
+  const { phoneNumber } = req.body;
 
-  if (!telegramId || telegramId.trim().length === 0) {
-    return res.status(400).json({ error: "Telegram ID majburiy" });
+  if (!phoneNumber || phoneNumber.trim().length === 0) {
+    return res.status(400).json({ error: "Telefon raqami majburiy" });
   }
 
   next();
