@@ -6,11 +6,11 @@ const Sale = require("../models/Sale");
 const { authenticate, isAdmin } = require("../middleware/auth");
 const { validateSeller } = require("../middleware/validation");
 
-
+// All admin routes require authentication and admin role
 router.use(authenticate);
 router.use(isAdmin);
 
-
+// Get all sellers
 router.get("/sellers", async (req, res) => {
   try {
     const sellers = await User.find({ role: "seller" })
@@ -24,30 +24,21 @@ router.get("/sellers", async (req, res) => {
   }
 });
 
-
+// Create new seller
 router.post("/sellers", validateSeller, async (req, res) => {
   try {
     const { telegramId, username, firstName, lastName, phoneNumber } = req.body;
 
-
-    if (telegramId) {
-      const existingUser = await User.findOne({ telegramId });
-      if (existingUser) {
-        return res.status(400).json({ error: "Foydalanuvchi (Telegram ID) allaqachon mavjud" });
-      }
-    }
-
-
-    const existingPhone = await User.findOne({ phoneNumber });
-    if (existingPhone) {
-      return res.status(400).json({ error: "Telefon raqami allaqachon mavjud" });
+    const existingUser = await User.findOne({ phoneNumber });
+    if (existingUser) {
+      return res.status(400).json({ error: "Ushbu telefon raqamli foydalanuvchi allaqachon mavjud" });
     }
 
     const seller = await User.create({
-    
-      username: username || "",
-      firstName: firstName || "",
-      lastName: lastName || "",
+      telegramId: telegramId || null,
+      username,
+      firstName,
+      lastName,
       phoneNumber,
       role: "seller",
     });
@@ -58,6 +49,7 @@ router.post("/sellers", validateSeller, async (req, res) => {
   }
 });
 
+// Update seller
 router.put("/sellers/:id", async (req, res) => {
   try {
     const { username, firstName, lastName, isActive } = req.body;
@@ -77,7 +69,7 @@ router.put("/sellers/:id", async (req, res) => {
   }
 });
 
-
+// Delete seller
 router.delete("/sellers/:id", async (req, res) => {
   try {
     const seller = await User.findById(req.params.id);
@@ -93,7 +85,7 @@ router.delete("/sellers/:id", async (req, res) => {
   }
 });
 
-
+// Assign product to seller
 router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
   try {
     const { quantity } = req.body;
@@ -119,11 +111,12 @@ router.post("/sellers/:sellerId/products/:productId", async (req, res) => {
       await seller.save();
     }
 
-
+    // Add seller to product's assigned sellers
     if (!product.assignedSellers.includes(seller._id)) {
       product.assignedSellers.push(seller._id);
     }
-
+    
+    // Reduce stock if quantity provided
     if (assignQuantity > 0) {
       product.stock -= assignQuantity;
     }

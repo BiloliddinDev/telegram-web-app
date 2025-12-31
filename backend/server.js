@@ -17,9 +17,15 @@ app.use(
 app.use(express.json());
 
 mongoose
-    .connect(process.env.MONGO_URI)
-    .then(() => console.log("MongoDB connected"))
-    .catch((err) => console.error("MongoDB connection error:", err));
+    .connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop()))
+    .catch((err) => {
+        console.error("MongoDB connection error details:", err);
+        process.exit(1);
+    });
 
 const isProduction = process.env.NODE_ENV === "production";
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
@@ -28,25 +34,32 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
 
 // Bot commands
 bot.setMyCommands([
-    { command: "start", description: "Botni ishga tushirish" },
-    { command: "help", description: "Yordam olish" },
-    { command: "status", description: "Sotuvlar holatini tekshirish" }
+    { command: '/start', description: 'Botni ishga tushirish' },
+    { command: '/help', description: 'Yordam olish' },
+    { command: '/profile', description: 'Mening profilim' },
+    { command: '/products', description: 'Mahsulotlar ro\'yxati' },
+    { command: '/sales', description: 'Mening savdolarim' }
 ]);
 
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, "Assalomu alaykum! Web app orqali do'koningizni boshqarishingiz mumkin.", {
+    bot.sendMessage(chatId, "Assalomu alaykum! Savdo tizimi botiga xush kelibsiz.\n\nIltimos, tizimga kirish uchun Web App tugmasini bosing yoki admin bilan bog'laning.", {
         reply_markup: {
             inline_keyboard: [
                 [
                     {
-                        text: "Ilovani ochish",
-                        web_app: { url: process.env.FRONTEND_URL || "https://your-app.vercel.app" }
+                        text: "Web App-ni ochish",
+                        web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
                     }
                 ]
             ]
         }
     });
+});
+
+bot.onText(/\/help/, (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "Ushbu bot orqali siz mahsulotlarni sotishingiz va hisobotlarni ko'rishingiz mumkin.\n\nAgar muammo bo'lsa, @admin bilan bog'laning.");
 });
 
 app.use("/api/auth", require("./routes/auth"));

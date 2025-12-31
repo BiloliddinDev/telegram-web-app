@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema({
   telegramId: {
     type: String,
-    required: false,
     unique: true,
     sparse: true,
   },

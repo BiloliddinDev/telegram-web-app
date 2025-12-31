@@ -31,6 +31,10 @@ export const useAuthStore = create<AuthState>((set) => ({
       const telegramId = getTelegramUserId();
       console.log("Fetching user with Telegram ID:", telegramId);
 
+      if (!telegramId) {
+        throw new Error("Telegram ID topilmadi");
+      }
+
       const response = await api.get("/auth/me");
       console.log("User fetched:", response.data.user);
 
