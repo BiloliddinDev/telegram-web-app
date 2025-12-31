@@ -52,10 +52,10 @@ router.post("/sellers", validateSeller, async (req, res) => {
 // Update seller
 router.put("/sellers/:id", async (req, res) => {
   try {
-    const { username, firstName, lastName, isActive } = req.body;
+    const { username, firstName, lastName, phoneNumber, avatarUrl, isActive } = req.body;
     const seller = await User.findByIdAndUpdate(
       req.params.id,
-      { username, firstName, lastName, isActive },
+      { username, firstName, lastName, phoneNumber, avatarUrl, isActive },
       { new: true }
     ).select("-__v");
 

@@ -101,13 +101,20 @@ const api = axios.create({
   },
 });
 
-// Add request interceptor to include Telegram ID
+// Add request interceptor to include Telegram ID and Init Data
 api.interceptors.request.use(
   (config) => {
+    const webApp = getTelegramData();
     const telegramId = getTelegramUserId();
+    
     if (telegramId) {
       config.headers["x-telegram-id"] = telegramId;
     }
+
+    if (webApp?.initData) {
+      config.headers["x-telegram-init-data"] = webApp.initData;
+    }
+
     return config;
   },
   (error: unknown) => {

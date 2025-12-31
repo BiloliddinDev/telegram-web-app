@@ -36,6 +36,32 @@ export const useCreateSeller = () => {
   });
 };
 
+export const useUpdateSeller = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<User> }) => {
+      const response = await api.put(`/admin/sellers/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sellers"] });
+    },
+  });
+};
+
+export const useDeleteSeller = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await api.delete(`/admin/sellers/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sellers"] });
+    },
+  });
+};
+
 export const useAssignProduct = () => {
   const queryClient = useQueryClient();
   return useMutation({

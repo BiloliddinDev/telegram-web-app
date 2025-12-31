@@ -69,11 +69,7 @@ export function CreateSellerDialog() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="telegramId">Telegram ID (Ixtiyoriy)</Label>
-              <Input id="telegramId" {...register("telegramId")} />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Username (Ixtiyoriy)</Label>
               <Input id="username" {...register("username")} />
             </div>
             <div className="grid gap-2">
@@ -81,7 +77,7 @@ export function CreateSellerDialog() {
               <Input id="firstName" {...register("firstName", { required: true })} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="lastName">Familiya</Label>
+              <Label htmlFor="lastName">Familiya (Ixtiyoriy)</Label>
               <Input id="lastName" {...register("lastName")} />
             </div>
           </div>

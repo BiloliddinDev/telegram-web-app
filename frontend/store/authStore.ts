@@ -8,6 +8,8 @@ interface User {
   username?: string;
   firstName?: string;
   lastName?: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
   role: "admin" | "seller";
   isActive: boolean;
   assignedProducts?: string[];
