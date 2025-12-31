@@ -3,7 +3,7 @@
 import { useAnalytics } from "@/hooks/useAnalytics";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
-import { ArrowLeft, Users, Package, Wallet, TrendingUp } from "lucide-react";
+import { ArrowLeft, Users, Package, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -17,7 +17,7 @@ export default function AnalyticsPage() {
   }
 
   if (!data) {
-    return <div className="p-8 text-center">Ma'lumot topilmadi</div>;
+    return <div className="p-8 text-center">{"Ma'lumot autopilot"}</div>;
   }
 
   const { summary, sellers } = data;
@@ -43,7 +43,7 @@ export default function AnalyticsPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold">Analytics</h1>
-            <p className="text-muted-foreground">Tizim bo'yicha umumiy hisobotlar</p>
+            <p className="text-muted-foreground">{"Tizim bo'yicha umumiy hisobotlar"}</p>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export default function AnalyticsPage() {
               <TrendingUp className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{summary.totalInventoryValue.toLocaleString()} so'm</div>
+              <div className="text-2xl font-bold">{summary.totalInventoryValue.toLocaleString()}{"so'm"}</div>
               <p className="text-xs text-muted-foreground mt-1">Ombor + Sotuvchilardagi</p>
             </CardContent>
           </Card>
@@ -65,7 +65,7 @@ export default function AnalyticsPage() {
               <Package className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">{summary.warehouseStockValue.toLocaleString()} so'm</div>
+              <div className="text-2xl font-bold text-green-600">{summary.warehouseStockValue.toLocaleString()}{"so'm"}</div>
               <p className="text-xs text-muted-foreground mt-1">Tarqatilmagan tovarlar</p>
             </CardContent>
           </Card>
@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
               <Users className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{summary.sellerStockValue.toLocaleString()} so'm</div>
+              <div className="text-2xl font-bold text-blue-600">{summary.sellerStockValue.toLocaleString()} {"so'm"}</div>
               <p className="text-xs text-muted-foreground mt-1">Sotilmagan tovarlar</p>
             </CardContent>
           </Card>
@@ -150,7 +150,7 @@ export default function AnalyticsPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground text-sm">Mavjud tovarlar:</span>
-                      <span className="font-bold">{seller.totalValue.toLocaleString()} so'm</span>
+                      <span className="font-bold">{seller.totalValue.toLocaleString()} {"so'm"}</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground text-sm">Mahsulotlar soni:</span>
