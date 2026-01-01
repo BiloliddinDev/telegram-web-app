@@ -23,41 +23,39 @@ mongoose
     })
     .then(async () => {
         console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop());
-        // Eski va xato indekslarni o'chirish (agar mavjud bo'lsa)
-        try {
-            const User = require("./models/User");
-            
-            // Bo'sh stringli phoneNumber'larni tozalash (unique indeks ishlashi uchun)
-            await User.updateMany(
-                { phoneNumber: "" },
-                { $unset: { phoneNumber: "" } }
-            );
-
-            await User.collection.dropIndex("phone_1");
-            console.log("Old 'phone_1' index dropped and empty phoneNumbers cleaned");
-        } catch (e) {
-            // Indeks mavjud bo'lmasa yoki boshqa xato bo'lsa ham davom etamiz
-        }
     })
     .catch((err) => {
         console.error("MongoDB connection error details:", err);
         process.exit(1);
     });
 
+const normalizePhone = (phone) => {
+    let cleaned = phone.replace(/\D/g, ""); // Faqat raqamlarni qoldiradi
+    if (!cleaned.startsWith("998")) {
+        cleaned = "998" + cleaned; // Agar 901234567 bo'lsa, 998 qo'shadi
+    }
+    return cleaned;
+};
+
 const isProduction = process.env.NODE_ENV === "production";
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
     polling: !isProduction
 });
 
+bot.on("polling_error", (error) => {
+    if (error.code === 'EFATAL') {
+        console.error("Bot boshqa joyda ishlab turibdi (Conflict). Iltimos, boshqa instance'larni o'chiring.");
+    } else {
+        console.error("Polling error:", error.code, error.message);
+    }
+});
+
 const User = require("./models/User");
 
-// Bot commands
-bot.setMyCommands([
-    { command: '/start', description: 'Botni ishga tushirish' },
-    { command: '/help', description: 'Yordam olish' }
-]);
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://telegram-web-app-sand.vercel.app/";
 
-bot.onText(/\/start/, async (msg) => {
+// Bot Handlers
+const handleStartCommand = async (msg) => {
     const chatId = msg.chat.id;
     
     try {
@@ -70,7 +68,7 @@ bot.onText(/\/start/, async (msg) => {
                         [
                             {
                                 text: "Web App-ni ochish",
-                                web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
+                                web_app: { url: FRONTEND_URL }
                             }
                         ]
                     ]
@@ -96,33 +94,33 @@ bot.onText(/\/start/, async (msg) => {
         console.error("Start command error:", error);
         bot.sendMessage(chatId, "Xatolik yuz berdi. Iltimos keyinroq qayta urunib ko'ring.");
     }
-});
+};
 
-bot.on('contact', async (msg) => {
+const handleContactMessage = async (msg) => {
     const chatId = msg.chat.id;
     
     if (msg.contact.user_id !== msg.from.id) {
         return bot.sendMessage(chatId, "Xavfsizlik maqsadida faqat o'zingizning telefon raqamingizni yuboring.");
     }
 
-    // Raqamni normalize qilish: faqat raqamlarni qoldirish
-    const phoneNumber = msg.contact.phone_number.replace(/\D/g, "");
+    const rawPhoneNumber = msg.contact.phone_number;
+    const normalizedPhoneNumber = normalizePhone(rawPhoneNumber);
     
     try {
         // Raqamni bir necha formatda qidiramiz
         const user = await User.findOne({
             $or: [
-                { phoneNumber: phoneNumber },
-                { phoneNumber: `+${phoneNumber}` },
-                { phoneNumber: phoneNumber.startsWith("998") ? phoneNumber.substring(3) : phoneNumber }
+                { phoneNumber: normalizedPhoneNumber },
+                { phoneNumber: `+${normalizedPhoneNumber}` },
+                { phoneNumber: normalizedPhoneNumber.startsWith("998") ? normalizedPhoneNumber.substring(3) : normalizedPhoneNumber }
             ]
         });
 
         if (user) {
             user.telegramId = chatId.toString();
             if (msg.from.username) user.username = msg.from.username;
-            if (!user.firstName) user.firstName = msg.from.first_name;
-            if (!user.lastName) user.lastName = msg.from.last_name;
+            if (msg.from.first_name) user.firstName = msg.from.first_name;
+            if (msg.from.last_name) user.lastName = msg.from.last_name;
             await user.save();
 
             bot.sendMessage(chatId, "Muvaffaqiyatli bog'landi! Endi Web App-dan foydalanishingiz mumkin:", {
@@ -131,7 +129,7 @@ bot.on('contact', async (msg) => {
                         [
                             {
                                 text: "Web App-ni ochish",
-                                web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
+                                web_app: { url: FRONTEND_URL }
                             }
                         ]
                     ]
@@ -144,7 +142,16 @@ bot.on('contact', async (msg) => {
         console.error("Bot contact error:", error);
         bot.sendMessage(chatId, "Xatolik yuz berdi. Iltimos keyinroq qayta urunib ko'ring.");
     }
-});
+};
+
+// Bot commands
+bot.setMyCommands([
+    { command: '/start', description: 'Botni ishga tushirish' },
+    { command: '/help', description: 'Yordam olish' }
+]);
+
+bot.onText(/\/start/, handleStartCommand);
+bot.on('contact', handleContactMessage);
 
 bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
