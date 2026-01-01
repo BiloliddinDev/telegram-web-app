@@ -24,8 +24,7 @@ const normalizePhone = (phone) => {
     return cleaned;
 };
 
-const botOptions = { polling: true };
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, botOptions);
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
 
 mongoose
     .connect(process.env.MONGO_URI, {
@@ -34,13 +33,6 @@ mongoose
     })
     .then(async () => {
         console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop());
-        
-        // Webhook-ni tozalash va pollingni qayta yoqish
-        bot.deleteWebHook()
-            .then(() => {
-                console.log("Webhook tozalandi, bot polling rejimida ishlamoqda.");
-            })
-            .catch(err => console.error("Webhookni o'chirishda xato:", err));
     })
     .catch((err) => {
         console.error("MongoDB connection error details:", err);
@@ -49,17 +41,18 @@ mongoose
 
 const isProduction = process.env.NODE_ENV === "production";
 
-bot.on("polling_error", (error) => {
-    if (error.code === 'EFATAL') {
-        console.error("Bot boshqa joyda ishlab turibdi (Conflict). Iltimos, boshqa instance'larni o'chiring.");
-    } else {
-        console.error("Polling error:", error.code, error.message);
+const User = require("./models/User");
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://telegram-web-app-sand.vercel.app/";
+
+app.post("/api/webhook", async (req, res) => {
+    try {
+        bot.processUpdate(req.body);
+        res.sendStatus(200);
+    } catch (error) {
+        console.error("Webhook error:", error);
+        res.sendStatus(500);
     }
 });
-
-const User = require("./models/User");
-
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://telegram-web-app-sand.vercel.app/";
 
 
 const handleStartCommand = async (msg) => {
@@ -194,6 +187,12 @@ if (!isProduction) {
     app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
+}
+
+if (process.env.BACKEND_URL) {
+    bot.setWebHook(process.env.BACKEND_URL + "/api/webhook")
+        .then(() => console.log("Webhook o'rnatildi:", process.env.BACKEND_URL + "/api/webhook"))
+        .catch(err => console.error("Webhook o'rnatishda xato:", err));
 }
 
 module.exports = app;
