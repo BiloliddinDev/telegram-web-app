@@ -97,6 +97,12 @@ async function handleContactMessage(msg) {
 }
 
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/products", require("./routes/products"));
+app.use("/api/sales", require("./routes/sales"));
+app.use("/api/seller", require("./routes/seller"));
+app.use("/api/admin", require("./routes/admin"));
+app.use("/api/analytics", require("./routes/analytics"));
+app.use("/api/transfers", require("./routes/transfers"));
 
 if (process.env.BACKEND_URL) {
     bot.setWebHook(`${process.env.BACKEND_URL}/api/webhook`)

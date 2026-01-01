@@ -25,9 +25,10 @@ const authenticate = async (req, res, next) => {
     let user = await User.findOne({ telegramId: telegramId });
 
     if (!user) {
+      console.log("User not found for telegramId:", telegramId);
       // Admin bo'lsa va hali bazada bo'lmasa, yaratishga ruxsat berish mumkin (ixtiyoriy)
-      // Lekin topshiriqqa ko'ra, faqat mavjud foydalanuvchilarni aniqlash kerak.
       if (telegramId === process.env.ADMIN_ID) {
+        console.log("Creating admin user...");
         user = await User.create({
           telegramId,
           firstName: telegramUser?.first_name || "Admin",
@@ -35,6 +36,7 @@ const authenticate = async (req, res, next) => {
           role: "admin",
         });
       } else {
+        console.log("Unauthorized: User not in DB");
         return res.status(401).json({ 
           error: "Siz ro'yxatdan o'tmagansiz", 
           message: "Iltimos, avval bot orqali ro'yxatdan o'ting." 
