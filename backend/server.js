@@ -16,19 +16,6 @@ app.use(
 );
 app.use(express.json());
 
-mongoose
-    .connect(process.env.MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    })
-    .then(async () => {
-        console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop());
-    })
-    .catch((err) => {
-        console.error("MongoDB connection error details:", err);
-        process.exit(1);
-    });
-
 const normalizePhone = (phone) => {
     let cleaned = phone.replace(/\D/g, ""); 
     if (!cleaned.startsWith("998")) {
@@ -37,20 +24,30 @@ const normalizePhone = (phone) => {
     return cleaned;
 };
 
-const isProduction = process.env.NODE_ENV === "production";
-
-const botOptions = !isProduction 
-    ? { polling: { autoStart: true, interval: 100 } } 
-    : { polling: false };
-
+const botOptions = { polling: true };
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, botOptions);
 
-// Webhook-ni o'chirish (Polling to'g'ri ishlashi uchun)
-if (!isProduction) {
-    bot.deleteWebHook()
-        .then(() => console.log("Webhook o'chirildi, Polling yoqildi."))
-        .catch(err => console.error("Webhook o'chirishda xato:", err));
-}
+mongoose
+    .connect(process.env.MONGO_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(async () => {
+        console.log("MongoDB connected successfully to:", process.env.MONGO_URI.split('@').pop());
+        
+        // Webhook-ni tozalash va pollingni qayta yoqish
+        bot.deleteWebHook()
+            .then(() => {
+                console.log("Webhook tozalandi, bot polling rejimida ishlamoqda.");
+            })
+            .catch(err => console.error("Webhookni o'chirishda xato:", err));
+    })
+    .catch((err) => {
+        console.error("MongoDB connection error details:", err);
+        process.exit(1);
+    });
+
+const isProduction = process.env.NODE_ENV === "production";
 
 bot.on("polling_error", (error) => {
     if (error.code === 'EFATAL') {
@@ -69,6 +66,9 @@ const handleStartCommand = async (msg) => {
     const chatId = msg.chat.id;
     
     try {
+        const me = await bot.getMe();
+        console.log("Bot holati:", me.username, "ishga tayyor.");
+
         const user = await User.findOne({ telegramId: chatId.toString() });
         
         if (user) {
@@ -163,7 +163,7 @@ bot.setMyCommands([
 // Xabarlarni log qilish
 bot.on('message', (msg) => {
     if (msg.text) {
-        console.log("Xabar keldi:", msg.text);
+        console.log("Xabar keldi:", msg.from.username, msg.text);
     }
 });
 
