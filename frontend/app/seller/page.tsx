@@ -20,7 +20,7 @@ import { Product } from "@/interface/products.type";
 import { Sale } from "@/interface/sale.type";
 import { useCreateSale } from "@/hooks/useSales";
 import { ShoppingCart, CheckCircle2 } from "lucide-react";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 
 interface CartItem {
   product: Product;
