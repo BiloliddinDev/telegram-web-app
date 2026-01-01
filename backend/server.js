@@ -9,9 +9,33 @@ const app = express();
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 
+// Ensure DB connection for all requests
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        res.status(500).json({ error: "Ma'lumotlar bazasiga ulanib bo'lmadi" });
+    }
+});
+
+let cachedConnection = null;
+
 const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) return;
-    return mongoose.connect(process.env.MONGO_URI);
+    if (cachedConnection && mongoose.connection.readyState >= 1) return cachedConnection;
+
+    try {
+        cachedConnection = await mongoose.connect(process.env.MONGO_URI, {
+            serverSelectionTimeoutMS: 5000,
+            maxPoolSize: 10,
+        });
+        console.log("MongoDB-ga ulanish o'rnatildi.");
+        return cachedConnection;
+    } catch (err) {
+        console.error("DB ulanish xatosi:", err);
+        cachedConnection = null;
+        throw err;
+    }
 };
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: false });
@@ -25,7 +49,6 @@ const normalizePhone = (phone) => {
 
 app.post("/api/webhook", async (req, res) => {
     try {
-        await connectDB();
         const { message } = req.body;
 
         if (!message) return res.status(200).send("No message");
