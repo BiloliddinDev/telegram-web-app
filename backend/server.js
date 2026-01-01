@@ -57,30 +57,59 @@ bot.setMyCommands([
     { command: '/help', description: 'Yordam olish' }
 ]);
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, "Assalomu alaykum! Savdo tizimi botiga xush kelibsiz.\n\nIltimos, tizimdan foydalanish uchun telefon raqamingizni yuboring:", {
-        reply_markup: {
-            keyboard: [
-                [
-                    {
-                        text: "Telefon raqamni yuborish",
-                        request_contact: true
-                    }
-                ]
-            ],
-            resize_keyboard: true,
-            one_time_keyboard: true
+    
+    try {
+        const user = await User.findOne({ telegramId: chatId.toString() });
+        
+        if (user) {
+            return bot.sendMessage(chatId, `Xush kelibsiz, ${user.firstName}! Savdo tizimi botidan foydalanishingiz mumkin.`, {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: "Web App-ni ochish",
+                                web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
+                            }
+                        ]
+                    ]
+                }
+            });
         }
-    });
+
+        bot.sendMessage(chatId, "Assalomu alaykum! Tizimdan foydalanish uchun telefon raqamingizni tasdiqlashingiz kerak.", {
+            reply_markup: {
+                keyboard: [
+                    [
+                        {
+                            text: "📱 Telefon raqamni yuborish",
+                            request_contact: true
+                        }
+                    ]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+    } catch (error) {
+        console.error("Start command error:", error);
+        bot.sendMessage(chatId, "Xatolik yuz berdi. Iltimos keyinroq qayta urunib ko'ring.");
+    }
 });
 
 bot.on('contact', async (msg) => {
     const chatId = msg.chat.id;
-    const phoneNumber = msg.contact.phone_number.replace(/\+/g, "");
+    
+    if (msg.contact.user_id !== msg.from.id) {
+        return bot.sendMessage(chatId, "Xavfsizlik maqsadida faqat o'zingizning telefon raqamingizni yuboring.");
+    }
+
+    // Raqamni normalize qilish: faqat raqamlarni qoldirish
+    const phoneNumber = msg.contact.phone_number.replace(/\D/g, "");
     
     try {
-        // Raqamni bir necha formatda qidiramiz (asl holatda, + bilan, +siz)
+        // Raqamni bir necha formatda qidiramiz
         const user = await User.findOne({
             $or: [
                 { phoneNumber: phoneNumber },
@@ -96,7 +125,7 @@ bot.on('contact', async (msg) => {
             if (!user.lastName) user.lastName = msg.from.last_name;
             await user.save();
 
-            bot.sendMessage(chatId, "Tabriklaymiz! Siz muvaffaqiyatli ro'yxatdan o'tdingiz.\n\nEndi Web App'dan foydalanishingiz mumkin:", {
+            bot.sendMessage(chatId, "Muvaffaqiyatli bog'landi! Endi Web App-dan foydalanishingiz mumkin:", {
                 reply_markup: {
                     inline_keyboard: [
                         [
