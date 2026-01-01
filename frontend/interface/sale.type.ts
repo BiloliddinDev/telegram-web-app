@@ -10,3 +10,11 @@ export interface Sale {
     customerPhone?: string;
     createdAt: string;
 }
+
+export interface CreateSaleData {
+  productId: string;
+  quantity: number;
+  price: number;
+  customerName?: string;
+  customerPhone?: string;
+}

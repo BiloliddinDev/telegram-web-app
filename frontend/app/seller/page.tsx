@@ -7,7 +7,6 @@ import { useAuthStore } from "@/store/authStore";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -20,7 +19,8 @@ import { ProductCard } from "@/components/ProductCard";
 import { Product } from "@/interface/products.type";
 import { Sale } from "@/interface/sale.type";
 import { useCreateSale } from "@/hooks/useSales";
-import { ShoppingCart, CheckCircle2, X } from "lucide-react";
+import { ShoppingCart, CheckCircle2 } from "lucide-react";
+import axios, { AxiosError } from "axios";
 
 interface CartItem {
   product: Product;
@@ -74,19 +74,6 @@ export default function SellerPage() {
       };
     });
   };
-
-  const handleRemoveFromCart = (productId: string) => {
-    setCart(prev => {
-      const newCart = { ...prev };
-      if (newCart[productId].quantity > 1) {
-        newCart[productId].quantity -= 1;
-      } else {
-        delete newCart[productId];
-      }
-      return newCart;
-    });
-  };
-
   const handleCheckout = async () => {
     const items = Object.values(cart);
     if (items.length === 0) return;
@@ -107,8 +94,14 @@ export default function SellerPage() {
       refetchProducts();
       refetchSales();
       refetchReports();
-    } catch (error: any) {
-      showToast(error?.response?.data?.error || "Xatolik yuz berdi", "error");
+    } catch (error: unknown) {
+      let errorMessage = "Xatolik yuz berdi";
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.error || error.message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      showToast(errorMessage, "error");
     } finally {
       setIsProcessing(false);
     }
