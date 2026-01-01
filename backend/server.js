@@ -46,11 +46,13 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "https://telegram-web-app-sand.
 
 app.post("/api/webhook", async (req, res) => {
     try {
-        bot.processUpdate(req.body);
-        res.sendStatus(200);
-    } catch (error) {
-        console.error("Webhook error:", error);
-        res.sendStatus(500);
+        if (req.body && req.body.update_id) {
+            await bot.processUpdate(req.body); 
+        }
+        res.status(200).send('OK');
+    } catch (e) {
+        console.error("Webhook processing error:", e);
+        res.status(200).send('OK');
     }
 });
 
