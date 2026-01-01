@@ -22,23 +22,24 @@ const authenticate = async (req, res, next) => {
       }
     }
 
-    let user = await User.findOne({
-      $or: [
-        { telegramId: telegramId },
-        { phoneNumber: telegramId },
-      ],
-    });
+    let user = await User.findOne({ telegramId: telegramId });
 
     if (!user) {
-      // Auto-create user if doesn't exist
-      user = await User.create({
-        telegramId,
-        firstName: telegramUser?.first_name || "",
-        lastName: telegramUser?.last_name || "",
-        username: telegramUser?.username || "",
-        avatarUrl: telegramUser?.photo_url || "",
-        role: telegramId === process.env.ADMIN_ID ? "admin" : "seller",
-      });
+      // Admin bo'lsa va hali bazada bo'lmasa, yaratishga ruxsat berish mumkin (ixtiyoriy)
+      // Lekin topshiriqqa ko'ra, faqat mavjud foydalanuvchilarni aniqlash kerak.
+      if (telegramId === process.env.ADMIN_ID) {
+        user = await User.create({
+          telegramId,
+          firstName: telegramUser?.first_name || "Admin",
+          username: telegramUser?.username || "admin",
+          role: "admin",
+        });
+      } else {
+        return res.status(401).json({ 
+          error: "Siz ro'yxatdan o'tmagansiz", 
+          message: "Iltimos, avval bot orqali ro'yxatdan o'ting." 
+        });
+      }
     } else {
       // Update existing user info from Telegram if available
       let updated = false;

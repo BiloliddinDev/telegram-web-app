@@ -35,7 +35,7 @@ router.post("/sellers", validateSeller, async (req, res) => {
     }
 
     const seller = await User.create({
-      telegramId: telegramId || null,
+      telegramId: telegramId || undefined,
       username,
       firstName,
       lastName,

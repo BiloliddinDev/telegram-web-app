@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "refresh-indices": "node scripts/refreshIndexes.js"
   },
   "keywords": [
     "telegram",

@@ -20,8 +20,6 @@ import { AxiosError } from "axios";
 
 interface SellerFormValues {
   phoneNumber: string;
-  telegramId?: string;
-  username?: string;
   firstName: string;
   lastName?: string;
 }
@@ -67,10 +65,6 @@ export function CreateSellerDialog() {
                 placeholder="+998901234567" 
                 {...register("phoneNumber", { required: true })} 
               />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="username">Username (Ixtiyoriy)</Label>
-              <Input id="username" {...register("username")} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="firstName">Ism</Label>

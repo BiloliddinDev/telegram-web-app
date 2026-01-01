@@ -39,10 +39,14 @@ const validateSale = (req, res, next) => {
 };
 
 const validateSeller = (req, res, next) => {
-  const { phoneNumber } = req.body;
+  const { phoneNumber, firstName } = req.body;
 
   if (!phoneNumber || phoneNumber.trim().length === 0) {
     return res.status(400).json({ error: "Telefon raqam majburiy" });
+  }
+
+  if (!firstName || firstName.trim().length === 0) {
+    return res.status(400).json({ error: "Ism majburiy" });
   }
 
   next();

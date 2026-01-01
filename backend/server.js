@@ -49,29 +49,72 @@ const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
     polling: !isProduction
 });
 
+const User = require("./models/User");
+
 // Bot commands
 bot.setMyCommands([
     { command: '/start', description: 'Botni ishga tushirish' },
-    { command: '/help', description: 'Yordam olish' },
-    { command: '/profile', description: 'Mening profilim' },
-    { command: '/products', description: 'Mahsulotlar ro\'yxati' },
-    { command: '/sales', description: 'Mening savdolarim' }
+    { command: '/help', description: 'Yordam olish' }
 ]);
 
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
-    bot.sendMessage(chatId, "Assalomu alaykum! Savdo tizimi botiga xush kelibsiz.\n\nIltimos, tizimga kirish uchun Web App tugmasini bosing yoki admin bilan bog'laning.", {
+    bot.sendMessage(chatId, "Assalomu alaykum! Savdo tizimi botiga xush kelibsiz.\n\nIltimos, tizimdan foydalanish uchun telefon raqamingizni yuboring:", {
         reply_markup: {
-            inline_keyboard: [
+            keyboard: [
                 [
                     {
-                        text: "Web App-ni ochish",
-                        web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
+                        text: "Telefon raqamni yuborish",
+                        request_contact: true
                     }
                 ]
-            ]
+            ],
+            resize_keyboard: true,
+            one_time_keyboard: true
         }
     });
+});
+
+bot.on('contact', async (msg) => {
+    const chatId = msg.chat.id;
+    const phoneNumber = msg.contact.phone_number.replace(/\+/g, "");
+    
+    try {
+        // Raqamni bir necha formatda qidiramiz (asl holatda, + bilan, +siz)
+        const user = await User.findOne({
+            $or: [
+                { phoneNumber: phoneNumber },
+                { phoneNumber: `+${phoneNumber}` },
+                { phoneNumber: phoneNumber.startsWith("998") ? phoneNumber.substring(3) : phoneNumber }
+            ]
+        });
+
+        if (user) {
+            user.telegramId = chatId.toString();
+            if (msg.from.username) user.username = msg.from.username;
+            if (!user.firstName) user.firstName = msg.from.first_name;
+            if (!user.lastName) user.lastName = msg.from.last_name;
+            await user.save();
+
+            bot.sendMessage(chatId, "Tabriklaymiz! Siz muvaffaqiyatli ro'yxatdan o'tdingiz.\n\nEndi Web App'dan foydalanishingiz mumkin:", {
+                reply_markup: {
+                    inline_keyboard: [
+                        [
+                            {
+                                text: "Web App-ni ochish",
+                                web_app: { url: process.env.FRONTEND_URL || "https://your-frontend-url.com" }
+                            }
+                        ]
+                    ]
+                }
+            });
+        } else {
+            bot.sendMessage(chatId, "Kechirasiz, siz sotuvchilar ro'yxatida yo'qsiz. Iltimos, admin bilan bog'laning.");
+        }
+    } catch (error) {
+        console.error("Bot contact error:", error);
+        bot.sendMessage(chatId, "Xatolik yuz berdi. Iltimos keyinroq qayta urunib ko'ring.");
+    }
 });
 
 bot.onText(/\/help/, (msg) => {
