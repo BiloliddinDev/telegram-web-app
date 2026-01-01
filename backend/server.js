@@ -30,17 +30,27 @@ mongoose
     });
 
 const normalizePhone = (phone) => {
-    let cleaned = phone.replace(/\D/g, ""); // Faqat raqamlarni qoldiradi
+    let cleaned = phone.replace(/\D/g, ""); 
     if (!cleaned.startsWith("998")) {
-        cleaned = "998" + cleaned; // Agar 901234567 bo'lsa, 998 qo'shadi
+        cleaned = "998" + cleaned; 
     }
     return cleaned;
 };
 
 const isProduction = process.env.NODE_ENV === "production";
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, {
-    polling: !isProduction
-});
+
+const botOptions = !isProduction 
+    ? { polling: { autoStart: true, interval: 100 } } 
+    : { polling: false };
+
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, botOptions);
+
+// Webhook-ni o'chirish (Polling to'g'ri ishlashi uchun)
+if (!isProduction) {
+    bot.deleteWebHook()
+        .then(() => console.log("Webhook o'chirildi, Polling yoqildi."))
+        .catch(err => console.error("Webhook o'chirishda xato:", err));
+}
 
 bot.on("polling_error", (error) => {
     if (error.code === 'EFATAL') {
@@ -54,7 +64,7 @@ const User = require("./models/User");
 
 const FRONTEND_URL = process.env.FRONTEND_URL || "https://telegram-web-app-sand.vercel.app/";
 
-// Bot Handlers
+
 const handleStartCommand = async (msg) => {
     const chatId = msg.chat.id;
     
@@ -149,6 +159,13 @@ bot.setMyCommands([
     { command: '/start', description: 'Botni ishga tushirish' },
     { command: '/help', description: 'Yordam olish' }
 ]);
+
+// Xabarlarni log qilish
+bot.on('message', (msg) => {
+    if (msg.text) {
+        console.log("Xabar keldi:", msg.text);
+    }
+});
 
 bot.onText(/\/start/, handleStartCommand);
 bot.on('contact', handleContactMessage);
